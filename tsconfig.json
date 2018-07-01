@@ -1,0 +1,18 @@
+{
+  "files": [
+    "startServer.ts"
+  ],
+  "filesGlob": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts"
+  ],
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "outDir": "./lib/",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "noImplicitAny": true,
+    "sourceMap": true
+  }
+}
