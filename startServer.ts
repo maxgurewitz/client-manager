@@ -2,7 +2,7 @@ import buildServer from './src/server/buildServer';
 
 async function startServer() {
   const server = await buildServer({
-    port: process.env.$PORT ? Number(process.env.$PORT) : undefined
+    port: process.env.PORT ? Number(process.env.PORT) : undefined
   });
   await server.start();
   return server;
