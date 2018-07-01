@@ -4,7 +4,7 @@ import Bluebird from 'bluebird';
 export default async function buildServer({ port } : { port?: number }): Bluebird<Hapi.Server> {
   const server = new Hapi.Server({
       port: port || 3000,
-      host: 'localhost'
+      host: '0.0.0.0'
   });
 
   server.route({
