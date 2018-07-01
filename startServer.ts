@@ -1,12 +1,17 @@
-interface Person {
-    firstName: string;
-    lastName: string;
+import buildServer from './src/server/buildServer';
+
+async function startServer() {
+  const server = await buildServer();
+  await server.start();
+  return server;
 }
 
-function greeter(person: Person) {
-    return "Hello, " + person.firstName + " " + person.lastName;
-}
-
-let user = { firstName: "Jane", lastName: "User" };
-
-console.log(greeter(user));
+startServer()
+  .then(() => {
+    console.log('Server started.');
+  })
+  .catch(e => {
+    console.error('Server start failed.');
+    console.error(e);
+    process.exit(1);
+  });
