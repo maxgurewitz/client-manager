@@ -1,9 +1,9 @@
 import * as Hapi from 'hapi';
 import Bluebird from 'bluebird';
 
-export default async function buildServer(): Bluebird<Hapi.Server> {
+export default async function buildServer({ port } : { port?: number }): Bluebird<Hapi.Server> {
   const server = new Hapi.Server({
-      port: 3000,
+      port: port || 3000,
       host: 'localhost'
   });
 
