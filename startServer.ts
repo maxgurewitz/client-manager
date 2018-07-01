@@ -9,8 +9,8 @@ async function startServer() {
 }
 
 startServer()
-  .then(() => {
-    console.log('Server started.');
+  .then(server => {
+    console.log(`Server started on ${server.info.port}.`);
   })
   .catch(e => {
     console.error('Server start failed.');
