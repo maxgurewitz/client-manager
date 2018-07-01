@@ -20,7 +20,7 @@ export default async function buildServer({ port } : { port?: number }): Bluebir
     method: 'GET',
     path: '/.well-known/acme-challenge/{content}',
     handler: (request, h) => {
-      return _.get(request, 'params.content', 'empty');
+      return 'QQUK5m9Qvz_ZcYE14hxIGz-1V_gWVSG8XQqaY0nue5A.uqPrriFGtq2QX4MpaGCK2ggRKAsIf7wibPqZYh3GwIU';
     }
   });
 
