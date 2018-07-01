@@ -5,6 +5,7 @@
   "main": "startServer.ts",
   "scripts": {
     "start": "ts-node-dev startServer.ts",
+    "production-start": "ts-node startServer",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
