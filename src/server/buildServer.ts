@@ -1,5 +1,5 @@
 import * as Hapi from 'hapi';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import Bluebird from 'bluebird';
 
 export default async function buildServer({ port } : { port?: number }): Bluebird<Hapi.Server> {
