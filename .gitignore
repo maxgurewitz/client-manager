@@ -4,11 +4,11 @@
 npm-debug.log*
 coverage
 node_modules
-dist/*
+dist/js/*
 lib
 .npm
 .node_repl_history
 .DS_Store
 .*.swp
 typings
-!dist/.gitkeep
+!dist/js/.gitkeep

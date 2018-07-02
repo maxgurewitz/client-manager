@@ -9,7 +9,7 @@
   ],
   "compilerOptions": {
     "strictNullChecks": true,
-    "outDir": "./lib/",
+    "outDir": "./dist/",
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "noImplicitAny": true,
