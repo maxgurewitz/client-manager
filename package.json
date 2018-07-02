@@ -7,7 +7,7 @@
     "client": "wp -w",
     "production-client": "NODE_ENV=production wp",
     "start": "ts-node-dev startServer.ts",
-    "production-start": "ts-node startServer",
+    "production-start": "NODE_ENV=production ts-node startServer",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -7,6 +7,8 @@ import * as inert from 'inert';
 import * as path from 'path';
 
 export default async function buildServer({ port } : { port?: number }): Bluebird<Hapi.Server> {
+  process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
   const server = new Hapi.Server({
       port: port || 3000,
       host: '0.0.0.0',
@@ -39,7 +41,7 @@ export default async function buildServer({ port } : { port?: number }): Bluebir
       auth: false
     },
     handler: function (request, h) {
-      return h.file(path.join('html', 'index.html'));
+      return h.file(path.join('html', `index.${process.env.NODE_ENV}.html`));
     }
   });
 
