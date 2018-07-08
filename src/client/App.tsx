@@ -77,8 +77,8 @@ interface State {
   isAuthenticated: boolean,
   isAuthorized: boolean,
   projectId: string | null,
-  nonce: string,
-  accessToken: string
+  nonce: string | null,
+  accessToken: string | null
 };
 
 export const App = class App extends React.Component<any, State> {
@@ -89,19 +89,21 @@ export const App = class App extends React.Component<any, State> {
     const accessToken = hashParams.access_token || localStorage.getItem('accessToken');
     const nonce = localStorage.getItem('nonce');
 
+    let authenticationInProgress = false;
+
+    if (accessToken && nonce) {
+      authenticationInProgress = true;
+      this.requestAuthentication(accessToken, nonce);
+    }
+
     const state = {
-      authenticationInProgress: false,
+      authenticationInProgress,
       isAuthenticated: false,
       isAuthorized: false,
       projectId: null,
       nonce,
       accessToken
     };
-
-    if (accessToken && nonce) {
-      state.authenticationInProgress = true;
-      this.requestAuthentication(accessToken, nonce);
-    }
 
     this.state = state;
   }

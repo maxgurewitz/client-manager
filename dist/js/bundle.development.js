@@ -11186,18 +11186,19 @@ exports.App = /** @class */ (function (_super) {
         var hashParams = qs.parse(location.hash.substring(1));
         var accessToken = hashParams.access_token || localStorage.getItem('accessToken');
         var nonce = localStorage.getItem('nonce');
+        var authenticationInProgress = false;
+        if (accessToken && nonce) {
+            authenticationInProgress = true;
+            _this.requestAuthentication(accessToken, nonce);
+        }
         var state = {
-            authenticationInProgress: false,
+            authenticationInProgress: authenticationInProgress,
             isAuthenticated: false,
             isAuthorized: false,
             projectId: null,
             nonce: nonce,
             accessToken: accessToken
         };
-        if (accessToken && nonce) {
-            state.authenticationInProgress = true;
-            _this.requestAuthentication(accessToken, nonce);
-        }
         _this.state = state;
         return _this;
     }
