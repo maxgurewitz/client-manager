@@ -21,6 +21,7 @@ const Register = () => (
   </div>
 );
 
+
 const AuthorizationPending = () => (
   <div>
     Authorization Pending
@@ -36,12 +37,13 @@ const Loading = () => (
 function randomString(length: number) {
     const bytes = new Uint8Array(length);
     const randomArray = crypto.getRandomValues(bytes);
-    const random = randomArray ? randomArray.toString() : '';
+    // circumvents TS type bug
+    const random = randomArray ? randomArray.toString().split(',').map(Number) : [];
     const result = [];
     const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~'
 
     for (let i = 0; i < random.length; i++) {
-      const randomNumber = Number(random.charAt(i));
+      const randomNumber = random[i];
       result.push(charset[randomNumber % charset.length]);
     };
     return result.join('');
@@ -56,26 +58,15 @@ const PublicHomePage = () => {
 
   const auth0Params = {
     nonce,
-    redirect_uri: `${location.origin}/request-permission`,
-    response_type: 'id_token',
+    redirect_uri: `${location.origin}/register`,
+    response_type: 'token',
     client_id: auth0ClientId
   };
 
-  const createProjectParams = _.merge({}, auth0Params, {
-    scope: 'admin',
-    redirect_uri: `${location.origin}/dashboard`,
-  });
-
   return (
     <div>
-      <a href={`${auth0AuthorizeUrl}?${qs.stringify(createProjectParams)}`}>
-        Create Project
-      </a>
-
-      <br/>
-
       <a href={`${auth0AuthorizeUrl}?${qs.stringify(auth0Params)}`}>
-        Login or
+        Login/Register
       </a>
     </div>
   );
@@ -85,33 +76,47 @@ interface State {
   authenticationInProgress: boolean,
   isAuthenticated: boolean,
   isAuthorized: boolean,
-  projectId: string | null
+  projectId: string | null,
+  nonce: string,
+  accessToken: string
 };
 
 export const App = class App extends React.Component<any, State> {
   constructor(props: any) {
     super(props);
 
+    const hashParams = qs.parse(location.hash.substring(1));
+    const accessToken = hashParams.access_token || localStorage.getItem('accessToken');
+    const nonce = localStorage.getItem('nonce');
+
     const state = {
       authenticationInProgress: false,
       isAuthenticated: false,
       isAuthorized: false,
-      projectId: null
+      projectId: null,
+      nonce,
+      accessToken
     };
 
-    const accessToken = localStorage.getItem('accessToken');
-    const nonce = localStorage.getItem('nonce');
-
     if (accessToken && nonce) {
-        state.authenticationInProgress = true;
-        this.requestAuthentication(accessToken, nonce);
+      state.authenticationInProgress = true;
+      this.requestAuthentication(accessToken, nonce);
     }
 
     this.state = state;
   }
 
-  requestAuthentication(accessToken: string, nonce: string) : Bluebird<String> {
-    return Bluebird.resolve('projectId');
+  requestAuthentication(accessToken: string, nonce: string) : Bluebird<void> {
+    return Bluebird.resolve('projectId')
+      .then(projectId => {
+        localStorage.setItem('accessToken', accessToken);
+        this.setState({
+          projectId,
+          authenticationInProgress: false,
+          isAuthorized: true,
+          isAuthenticated: true
+        });
+      });
   }
 
   render() {
@@ -127,13 +132,19 @@ export const App = class App extends React.Component<any, State> {
           } else if (this.state.isAuthenticated && !this.state.isAuthorized && this.state.projectId) {
             component = <Redirect to="/authorization-pending"/>;
           } else if (!this.state.isAuthenticated) {
-            component =  location.pathname !== '/' ? <PublicHomePage/> : <Redirect to="/"/>;
+            if (location.pathname === '/') {
+              component = <PublicHomePage/>;
+            } else {
+              component = <Redirect to="/"/>;
+            }
           } else {
             // when user is authenticated, authorized, and with projectId
             component = (
               <Switch>
                 <Route exact path="/" render={() => <Redirect to="/dashboard"/>}/>
                 <Route exact path="/dashboard" component={Dashboard}/>
+                <Route exact path="/register" component={Register}/>
+                <Route exact path="/authorization-pending" component={AuthorizationPending}/>
                 <Route component={NoMatch}/>
               </Switch>
             );
