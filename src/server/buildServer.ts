@@ -6,11 +6,14 @@ import * as path from 'path';
 
 const Sequelize = require('sequelize');
 
-export default async function buildServer({ port } : { port?: number }): Bluebird<Hapi.Server> {
+export default async function buildServer({ port, databaseUrl } : { port?: number, databaseUrl?: string }): Bluebird<Hapi.Server> {
   process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
   const sequelize = new Sequelize('client-manager', null, null, {
-    host: 'localhost',
+    host: databaseUrl || 'localhost',
+    dialectOptions: {
+      ssl: process.env.NODE_ENV !== 'development',
+    },
     dialect: 'postgres',
     operatorsAliases: false,
     pool: {
@@ -33,7 +36,6 @@ export default async function buildServer({ port } : { port?: number }): Bluebir
 
   await server.register([
     inert
-    // vision
   ]);
 
   server.route({
