@@ -1,13 +1,25 @@
 import * as Hapi from 'hapi';
 import * as _ from 'lodash';
 import Bluebird from 'bluebird';
-import * as vision from 'vision';
-import * as pug from 'pug';
 import * as inert from 'inert';
 import * as path from 'path';
 
+const Sequelize = require('sequelize');
+
 export default async function buildServer({ port } : { port?: number }): Bluebird<Hapi.Server> {
   process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
+  const sequelize = new Sequelize('client-manager', null, null, {
+    host: 'localhost',
+    dialect: 'postgres',
+    operatorsAliases: false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  });
 
   const server = new Hapi.Server({
       port: port || 3000,

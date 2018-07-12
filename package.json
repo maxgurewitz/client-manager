@@ -25,8 +25,10 @@
     "@types/hapi": "^17.0.13",
     "@types/inert": "^5.1.1",
     "@types/lodash": "^4.14.110",
+    "@types/pg": "^7.4.10",
     "@types/qs": "^6.5.1",
     "@types/react-router-dom": "^4.2.7",
+    "@types/sequelize": "^4.27.23",
     "awesome-typescript-loader": "^5.2.0",
     "source-map-loader": "^0.2.3",
     "ts-node-dev": "^1.0.0-pre.26",
@@ -41,10 +43,14 @@
     "hapi": "^17.5.2",
     "inert": "^5.1.0",
     "lodash": "^4.17.10",
+    "pg": "^7.4.3",
+    "pg-hstore": "^2.3.2",
     "qs": "^6.5.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-router-dom": "^4.3.1",
+    "sequelize": "^4.38.0",
+    "sequelize-cli": "^4.0.0",
     "ts-node": "^7.0.0"
   }
 }

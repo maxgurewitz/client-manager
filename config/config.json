@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "root",
+    "password": null,
+    "client_manager": "client_manager_development",
+    "host": "127.0.0.1",
+    "dialect": "pg"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "client_manager": "client_manager_test",
+    "host": "127.0.0.1",
+    "dialect": "pg"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "client_manager": "client_manager_production",
+    "host": "127.0.0.1",
+    "dialect": "pg"
+  }
+}
