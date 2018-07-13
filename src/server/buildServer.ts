@@ -40,6 +40,18 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
 
   server.route({
     method: 'GET',
+    path: '/api/authenticate',
+    options: {
+      auth: false
+    },
+    handler: function (request, h) {
+      const bearer = request.headers.bearer;
+      return { projectId: 'api' };
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: '/public/{param*}',
     handler: {
       directory: {

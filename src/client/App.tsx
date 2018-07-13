@@ -3,6 +3,7 @@ import { Redirect, BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 import * as qs from 'qs';
 import * as _ from 'lodash';
 import * as Bluebird from 'bluebird';
+import axios from 'axios';
 
 const NoMatch = () => (
   <div> 404 </div>
@@ -58,7 +59,7 @@ const PublicHomePage = () => {
 
   const auth0Params = {
     nonce,
-    redirect_uri: `${location.origin}/register`,
+    redirect_uri: location.origin,
     response_type: 'token',
     client_id: auth0ClientId
   };
@@ -108,23 +109,34 @@ export const App = class App extends React.Component<any, State> {
     this.state = state;
   }
 
-  requestAuthentication(accessToken: string, nonce: string) : Bluebird<void> {
-    return Bluebird.resolve('projectId')
-      .then(projectId => {
-        localStorage.setItem('accessToken', accessToken);
-        this.setState({
-          projectId,
-          authenticationInProgress: false,
-          isAuthorized: true,
-          isAuthenticated: true
-        });
+  requestAuthentication(accessToken: string, nonce: string) : Promise<void> {
+    return axios({
+      url: '/api/authenticate',
+      headers: {
+        Authentication: `Bearer ${accessToken}`
+      },
+      data: {
+        nonce
+      }
+    })
+    .then(({ data }) => {
+      debugger;
+      const { projectId } = data;
+
+      localStorage.setItem('accessToken', accessToken);
+      this.setState({
+        projectId,
+        authenticationInProgress: false,
+        isAuthorized: true,
+        isAuthenticated: true
       });
+    });
   }
 
   render() {
     return (
       <BrowserRouter>
-        <Route path="/" render={() => {
+        <Route path="/" render={(routerProps) => {
           let component;
 
           if (this.state.authenticationInProgress) {
@@ -134,7 +146,7 @@ export const App = class App extends React.Component<any, State> {
           } else if (this.state.isAuthenticated && !this.state.isAuthorized && this.state.projectId) {
             component = <Redirect to="/authorization-pending"/>;
           } else if (!this.state.isAuthenticated) {
-            if (location.pathname === '/') {
+            if (routerProps.location.pathname === '/') {
               component = <PublicHomePage/>;
             } else {
               component = <Redirect to="/"/>;
@@ -145,7 +157,7 @@ export const App = class App extends React.Component<any, State> {
               <Switch>
                 <Route exact path="/" render={() => <Redirect to="/dashboard"/>}/>
                 <Route exact path="/dashboard" component={Dashboard}/>
-                <Route exact path="/register" component={Register}/>
+                <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <Register/>}/>
                 <Route exact path="/authorization-pending" component={AuthorizationPending}/>
                 <Route component={NoMatch}/>
               </Switch>
