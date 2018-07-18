@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as Sequelize from 'sequelize';
 import * as hapiAuthBasic from 'hapi-auth-basic';
 
-const validate: hapiAuthBasic.Validate = async (request, username, password, h) => {
+const validate: hapiAuthBasic.Validate = async (request, email, password, h) => {
   return { isValid: true, credentials: {} };
 }
 
