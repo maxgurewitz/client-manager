@@ -59,14 +59,16 @@ const PublicHomePage = () => {
 
   const auth0Params = {
     nonce,
+    audience: 'https://maxthegeek1.auth0.com/api/v2/',
     redirect_uri: location.origin,
-    response_type: 'token',
+    response_type: 'token id_token',
     client_id: auth0ClientId
   };
+  const href = `${auth0AuthorizeUrl}?${qs.stringify(auth0Params)}`;
 
   return (
     <div>
-      <a href={`${auth0AuthorizeUrl}?${qs.stringify(auth0Params)}`}>
+      <a href={href}>
         Login/Register
       </a>
     </div>
@@ -120,7 +122,6 @@ export const App = class App extends React.Component<any, State> {
       }
     })
     .then(({ data }) => {
-      debugger;
       const { projectId } = data;
 
       localStorage.setItem('accessToken', accessToken);
@@ -130,6 +131,24 @@ export const App = class App extends React.Component<any, State> {
         isAuthorized: true,
         isAuthenticated: true
       });
+    })
+    .catch(e => {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('nonce');
+
+      if (e.response.status === '403') {
+        this.setState({
+          authenticationInProgress: false,
+          isAuthorized: false,
+          isAuthenticated: true
+        });
+      } else {
+        this.setState({
+          authenticationInProgress: false,
+          isAuthorized: false,
+          isAuthenticated: false
+        });
+      }
     });
   }
 
@@ -142,10 +161,16 @@ export const App = class App extends React.Component<any, State> {
           if (this.state.authenticationInProgress) {
             component = <Loading/>;
           } else if (this.state.isAuthenticated && !this.state.projectId) {
-            component = <Redirect to="/register"/>;
+            component = (
+              <Switch>
+                <Route exact path="/register" component={Register}/>
+                <Route render={() => <Redirect to="/register"/>}/>
+              </Switch>
+            );
           } else if (this.state.isAuthenticated && !this.state.isAuthorized && this.state.projectId) {
             component = <Redirect to="/authorization-pending"/>;
           } else if (!this.state.isAuthenticated) {
+            /* FIXME replace with Switch */
             if (routerProps.location.pathname === '/') {
               component = <PublicHomePage/>;
             } else {

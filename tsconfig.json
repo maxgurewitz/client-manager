@@ -8,6 +8,7 @@
     "src/**/*.d.ts"
   ],
   "compilerOptions": {
+    "lib": ["ES6", "DOM"],
     "strictNullChecks": true,
     "outDir": "./dist/",
     "allowSyntheticDefaultImports": true,
