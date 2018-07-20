@@ -14,8 +14,15 @@ afterAll(async () => {
   return server.stop();
 });
 
+test('create user returns user and session id', async () => {
+  const response = await axios.post(`${BASE_URL}/users`);
+  const { user, sessionId } = response.data;
+  expect(user).not.toBeUndefined();
+  expect(sessionId).not.toBeUndefined();
+  return null;
+});
+
 test('login without token gives 401', async () => {
-  const util = require('util');
   try {
     await axios.post(`${BASE_URL}/login`);
     fail('expected to throw');

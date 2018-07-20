@@ -16,12 +16,12 @@ const authPlugin = {
       return {
         async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
           if (!request.headers.authorization) {
-            throw Boom.unauthorized('Must provide authorization token');
+            throw Boom.unauthorized('Must provide authorization');
           }
 
           return h.authenticated({
             credentials: {
-              token: 'token'
+              sessionId: 'id'
             },
             artifacts: {
               projectId: 'projectId',
@@ -91,7 +91,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     method: 'POST',
     path: '/api/login',
     handler: async (request, h) => {
-      return { token: 'token' };
+      return { sessionId: 'id' };
     }
   });
 
@@ -102,7 +102,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       auth: false
     },
     handler: async (request, h) => {
-      return { token: 'token', user: {} };
+      return { sessionId: 'id', user: {} };
     }
   });
 
