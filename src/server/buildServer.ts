@@ -16,7 +16,7 @@ const authPlugin = {
       return {
         async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
           if (!request.headers.authorization) {
-            return h.unauthenticated(Boom.unauthorized('Must provide authorization token'));
+            throw Boom.unauthorized('Must provide authorization token');
           }
 
           return h.authenticated({
@@ -52,18 +52,23 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     }
   });
 
-  const server = new Hapi.Server({
+  const serverConfig: Hapi.ServerOptions = {
     port: port || 3000,
     host: '0.0.0.0',
     debug: {
-      request: ['error']
+      request: process.env.NODE_ENV === 'test' ? false : ['error']
     },
     routes: {
       files: {
         relativeTo: path.join(__dirname, '..', '..', 'dist')
       }
     }
-  });
+  };
+
+  if (process.env.NODE_ENV === 'test') {
+    _.set(serverConfig, 'routes.cors.origin', ['*']);
+  }
+  const server = new Hapi.Server(serverConfig);
 
   await server.register([
     inert,
