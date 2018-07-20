@@ -4,11 +4,35 @@ import * as Bluebird from 'bluebird';
 import * as inert from 'inert';
 import * as path from 'path';
 import * as Sequelize from 'sequelize';
-import * as hapiAuthBasic from 'hapi-auth-basic';
+import * as Boom from 'boom';
 
-const validate: hapiAuthBasic.Validate = async (request, email, password, h) => {
-  return { isValid: true, credentials: {} };
-}
+const authPlugin = {
+  pkg: {
+    name: 'custom-auth',
+    version: '1'
+  },
+  register(server: Hapi.Server) {
+    server.auth.scheme('custom-auth', server => {
+      return {
+        async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+          if (!request.headers.authorization) {
+            return h.unauthenticated(Boom.unauthorized('Must provide authorization token'));
+          }
+
+          return h.authenticated({
+            credentials: {
+              token: 'token'
+            },
+            artifacts: {
+              projectId: 'projectId',
+              email: 'email'
+            }
+          });
+        }
+      };
+    });
+  }
+};
 
 export default async function buildServer({ port, databaseUrl } : { port?: number, databaseUrl?: string }): Bluebird<Hapi.Server> {
   process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -43,18 +67,37 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
 
   await server.register([
     inert,
-    hapiAuthBasic
+    authPlugin
   ]);
 
-  server.auth.strategy('simple', 'basic', { validate });
+  server.auth.strategy('session', 'custom-auth');
 
-  server.auth.default('simple');
+  server.auth.default('session');
 
   server.route({
-    method: 'GET',
-    path: '/api/authenticate',
+    method: 'POST',
+    path: '/api/logout',
     handler: async (request, h) => {
-      return { projectId: 'api' };
+      return h.response().code(204);
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/login',
+    handler: async (request, h) => {
+      return { token: 'token' };
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/users',
+    options: {
+      auth: false
+    },
+    handler: async (request, h) => {
+      return { token: 'token', user: {} };
     }
   });
 
