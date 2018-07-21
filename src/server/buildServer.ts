@@ -22,14 +22,25 @@ const authPlugin = {
       return {
         async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
           if (!request.headers.authorization) {
-            throw Boom.unauthorized('Must provide authorization header');
+            throw Boom.unauthorized('Must provide authorization header.');
+          }
+
+          const session = await models.Session.findOne({
+            where: {
+              uuid: request.headers.authorization
+            }
+          });
+
+          if (!session) {
+            throw Boom.unauthorized('Invalid authorization header.');
           }
 
           return h.authenticated({
             credentials: {
-              sessionId: 'id'
+              sessionId: session.uuid,
             },
             artifacts: {
+              userId: session.userId,
               projectId: 'projectId',
               email: 'email'
             }
@@ -62,8 +73,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     port: port || 3000,
     host: '0.0.0.0',
     debug: {
-      // request: process.env.NODE_ENV === 'test' ? false : ['error']
-      request: false ? false : ['error']
+      request: ['error']
     },
     routes: {
       files: {
