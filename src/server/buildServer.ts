@@ -7,6 +7,10 @@ import * as Sequelize from 'sequelize';
 import * as Boom from 'boom';
 import * as bcrypt from 'bcrypt';
 import * as models from '../../models';
+import * as uuid from 'uuid/v1';
+
+// 3 days in ms
+const SESSION_EXPIRATION = 1000 * 60 * 60 * 24 * 3;
 
 const authPlugin = {
   pkg: {
@@ -17,7 +21,6 @@ const authPlugin = {
     server.auth.scheme('custom-auth', server => {
       return {
         async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-          console.log('loc1', request.headers);
           if (!request.headers.authorization) {
             throw Boom.unauthorized('Must provide authorization header');
           }
@@ -88,7 +91,6 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
 
   server.auth.default('session');
 
-
   server.route({
     method: 'GET',
     path: '/api/clients',
@@ -135,8 +137,16 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
         password: encryptedPassword
       });
 
+      const sessionId = uuid();
+
+      await models.Session.create({
+        userId: user.id,
+        uuid: sessionId,
+        expiration: Date.now() + SESSION_EXPIRATION
+      });
+
       return {
-        sessionId: 'id',
+        sessionId
       };
     }
   });
