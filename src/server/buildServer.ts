@@ -126,6 +126,23 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
   server.auth.default('session');
 
   server.route({
+    method: 'POST',
+    path: '/api/projects',
+    options: {
+      validate: {
+        payload: {
+          name: joi.string().required()
+        }
+      }
+    },
+    handler: async (request, h) => {
+      return { clients: [] };
+    }
+  });
+
+  // AUTHENTICATION
+
+  server.route({
     method: 'GET',
     path: '/api/clients',
     handler: async (request, h) => {

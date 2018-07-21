@@ -1,8 +1,9 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Sessions', {
+    return queryInterface.createTable('Permissions', {
       userId: {
+        unique: 'permissionCombination',
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
@@ -11,14 +12,15 @@ module.exports = {
           deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
         }
       },
-      expiration: {
+      projectId: {
+        unique: 'permissionCombination',
         allowNull: false,
-        type: Sequelize.DATE
-      },
-      uuid: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Projects',
+          key: 'id',
+          deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+        }
       },
       createdAt: {
         allowNull: false,
@@ -31,6 +33,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Sessions');
+    return queryInterface.dropTable('Permissions');
   }
 };
