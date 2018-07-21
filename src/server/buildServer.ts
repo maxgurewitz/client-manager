@@ -8,6 +8,7 @@ import * as Boom from 'boom';
 import * as bcrypt from 'bcrypt';
 import * as models from '../../models';
 import * as uuid from 'uuid/v1';
+import * as joi from 'joi';
 
 // 3 days in ms
 const SESSION_EXPIRATION = 1000 * 60 * 60 * 24 * 3;
@@ -21,6 +22,17 @@ interface ISession {
 interface ICredentials {
   sessionId: string
 }
+
+interface ILogin {
+  email: string,
+  password: string
+};
+
+interface ICreateUser {
+  email: string,
+  name: string,
+  password: string
+};
 
 const authPlugin = {
   pkg: {
@@ -140,18 +152,38 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     method: 'POST',
     path: '/api/login',
     options: {
-      auth: false
+      auth: false,
+      validate: {
+        payload: {
+          email: joi.string().email().required(),
+          password: joi.string().required(),
+        }
+      }
     },
     handler: async (request, h) => {
-      return { sessionId: 'id' };
+      const { email, password } = <ILogin> request.payload;
+
+      const user = await models.User.findOne({
+        where: { email }
+      });
+
+      const isPasswordValid = bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        throw Boom.unauthorized('Invalid password');
+      }
+
+      const sessionId = uuid();
+
+      const session = await models.Session.create({
+        userId: user.id,
+        expiration: Date.now() + SESSION_EXPIRATION,
+        uuid: sessionId
+      });
+
+      return { sessionId };
     }
   });
-
-  interface ICreateUser {
-    email: string,
-    name: string,
-    password: string
-  };
 
   server.route({
     method: 'POST',

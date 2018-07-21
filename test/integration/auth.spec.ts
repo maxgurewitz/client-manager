@@ -33,11 +33,13 @@ test('good session ids do give access', async () => {
   return null;
 });
 
-test.only('logging in works', async () => {
+test('logging in works', async () => {
+  const email = `${uuid()}@example.com`;
+  const password = 'some pass';
   const createUserResponse = await axios.post(`${BASE_URL}/users`, {
-    email: `${uuid()}@example.com`,
+    email,
     name: 'foo bar',
-    password: 'some pass'
+    password
   });
 
   await axios(`${BASE_URL}/logout`, {
@@ -48,9 +50,8 @@ test.only('logging in works', async () => {
   });
 
   const loginResponse = await axios.post(`${BASE_URL}/login`, {
-    email: `${uuid()}@example.com`,
-    name: 'foo bar',
-    password: 'some pass'
+    email,
+    password
   });
 
   await axios(`${BASE_URL}/logout`, {
@@ -115,15 +116,5 @@ test('create user returns user and working session id', async () => {
   });
   const { sessionId } = response.data;
   expect(sessionId).not.toBeUndefined();
-  return null;
-});
-
-test('login without session id gives 401', async () => {
-  try {
-    await axios.post(`${BASE_URL}/login`);
-    fail('expected to throw');
-  } catch (e) {
-    expect(e.response.status).toEqual(401);
-  }
   return null;
 });
