@@ -42,6 +42,12 @@ interface ICreateUser {
   password: string
 };
 
+interface ICreatePermission {
+  projectId: number,
+  targetId: number,
+  level: number
+};
+
 async function checkProjectPermissions(userId: number, projectId: number, maxPermissionLevel: number) {
   const permission = await models.Permission.findOne({
     where: {
@@ -219,6 +225,33 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
   });
 
   // AUTHENTICATION
+
+  server.route({
+    method: 'POST',
+    path: '/api/permissions',
+    options: {
+      validate: {
+        payload: {
+          targetId: joi.number().required(),
+          level: joi.number().only(0, 1).required()
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const { userId } = <IAuthArtifact> request.auth.artifacts;
+      const { projectId, targetId, level } = <ICreatePermission> request.payload;
+
+      await checkProjectPermissions(userId, projectId, 0);
+
+      await models.Permission.upsert({
+        level: String(level),
+        projectId,
+        userId: targetId
+      });
+
+      return h.response().code(204);
+    }
+  });
 
   server.route({
     method: 'POST',

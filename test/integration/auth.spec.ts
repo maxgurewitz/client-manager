@@ -17,6 +17,10 @@ afterAll(() => {
   return server.stop();
 });
 
+test.only('project creator can assign permissions', async () => {
+  return null;
+});
+
 test('creator of project has authorization for that project, not for other projects', async () => {
   const [userResponse1, userResponse2] = await Bluebird.all([
     axios.post(`${BASE_URL}/users`, {
