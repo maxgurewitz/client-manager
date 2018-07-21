@@ -139,6 +139,9 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
   server.route({
     method: 'POST',
     path: '/api/login',
+    options: {
+      auth: false
+    },
     handler: async (request, h) => {
       return { sessionId: 'id' };
     }

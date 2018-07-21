@@ -33,6 +33,36 @@ test('good session ids do give access', async () => {
   return null;
 });
 
+test.only('logging in works', async () => {
+  const createUserResponse = await axios.post(`${BASE_URL}/users`, {
+    email: `${uuid()}@example.com`,
+    name: 'foo bar',
+    password: 'some pass'
+  });
+
+  await axios(`${BASE_URL}/logout`, {
+    method: 'post',
+    headers: {
+      authorization: createUserResponse.data.sessionId
+    }
+  });
+
+  const loginResponse = await axios.post(`${BASE_URL}/login`, {
+    email: `${uuid()}@example.com`,
+    name: 'foo bar',
+    password: 'some pass'
+  });
+
+  await axios(`${BASE_URL}/logout`, {
+    method: 'post',
+    headers: {
+      authorization: loginResponse.data.sessionId
+    }
+  });
+
+  return null;
+});
+
 test('logging out works', async () => {
   const createUserResponse = await axios.post(`${BASE_URL}/users`, {
     email: `${uuid()}@example.com`,
