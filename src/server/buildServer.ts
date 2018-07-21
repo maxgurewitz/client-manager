@@ -18,6 +18,10 @@ interface ISession {
   userId: number
 }
 
+interface ICredentials {
+  sessionId: string
+}
+
 const authPlugin = {
   pkg: {
     name: 'custom-auth',
@@ -47,12 +51,10 @@ const authPlugin = {
 
           return h.authenticated({
             credentials: {
-              sessionId: session.uuid,
+              sessionId: session.uuid
             },
             artifacts: {
-              userId: session.userId,
-              projectId: 'projectId',
-              email: 'email'
+              userId: session.userId
             }
           });
         }
@@ -123,6 +125,13 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     method: 'POST',
     path: '/api/logout',
     handler: async (request, h) => {
+      const credentials = <ICredentials> request.auth.credentials;
+
+      await models.Session.destroy({
+        where: {
+          uuid: credentials.sessionId
+        }
+      });
       return h.response().code(204);
     }
   });

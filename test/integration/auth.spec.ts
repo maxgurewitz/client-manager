@@ -16,6 +16,52 @@ afterAll(() => {
   return server.stop();
 });
 
+test('good session ids do give access', async () => {
+  const response = await axios.post(`${BASE_URL}/users`, {
+    email: `${uuid()}@example.com`,
+    name: 'foo bar',
+    password: 'some pass'
+  });
+
+  await axios(`${BASE_URL}/logout`, {
+    method: 'post',
+    headers: {
+      authorization: response.data.sessionId
+    }
+  });
+
+  return null;
+});
+
+test('logging out works', async () => {
+  const createUserResponse = await axios.post(`${BASE_URL}/users`, {
+    email: `${uuid()}@example.com`,
+    name: 'foo bar',
+    password: 'some pass'
+  });
+
+  await axios(`${BASE_URL}/logout`, {
+    method: 'post',
+    headers: {
+      authorization: createUserResponse.data.sessionId
+    }
+  });
+
+  try {
+    await axios(`${BASE_URL}/logout`, {
+      method: 'post',
+      headers: {
+        authorization: createUserResponse.data.sessionId
+      }
+    });
+    fail('expected to throw');
+  } catch (e) {
+    expect(e.response.status).toEqual(401);
+  }
+
+  return null;
+});
+
 test("bad session ids don't give access", async () => {
   try {
     await axios(`${BASE_URL}/logout`, {
