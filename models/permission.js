@@ -1,8 +1,9 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var Permission = sequelize.define('Permission', {
-    userId: DataTypes.NUMBER,
-    projectId: DataTypes.NUMBER
+    level: DataTypes.ENUM(0, 1),
+    userId: DataTypes.INTEGER,
+    projectId: DataTypes.INTEGER
   }, {});
   Permission.associate = function(models) {
     // associations can be defined here

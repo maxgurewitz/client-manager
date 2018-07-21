@@ -2,6 +2,10 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Permissions', {
+      level: {
+        allowNull: false,
+        type: Sequelize.ENUM(0, 1)
+      },
       userId: {
         unique: 'permissionCombination',
         allowNull: false,

@@ -23,16 +23,39 @@ interface ICredentials {
   sessionId: string
 }
 
+interface IAuthArtifact {
+  userId: number
+}
+
 interface ILogin {
   email: string,
   password: string
 };
+
+interface ICreateProject {
+  name: string
+}
 
 interface ICreateUser {
   email: string,
   name: string,
   password: string
 };
+
+async function checkProjectPermissions(userId: number, projectId: number, maxPermissionLevel: number) {
+  const permission = await models.Permission.findOne({
+    where: {
+      projectId,
+      userId
+    }
+  });
+
+  if (!permission) {
+    throw Boom.forbidden('Missing permissions for this project.');
+  } else if (Number(permission.level) > maxPermissionLevel) {
+    throw Boom.forbidden('Permissions are too weak to support operation.');
+  }
+}
 
 const authPlugin = {
   pkg: {
@@ -61,14 +84,15 @@ const authPlugin = {
             throw Boom.unauthorized('Session has expired');
           }
 
-          return h.authenticated({
-            credentials: {
-              sessionId: session.uuid
-            },
-            artifacts: {
-              userId: session.userId
-            }
-          });
+          const credentials: ICredentials = {
+            sessionId: session.uuid
+          };
+
+          const artifacts: IAuthArtifact = {
+            userId: session.userId
+          };
+
+          return h.authenticated({ credentials, artifacts });
         }
       };
     });
@@ -136,11 +160,55 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       }
     },
     handler: async (request, h) => {
-      return { clients: [] };
+      const { userId } = <IAuthArtifact> request.auth.artifacts;
+
+      const { name } = <ICreateProject> request.payload;
+
+      const project = await models.Project.create({ name });
+
+      const permission = await models.Permission.create({
+        level: '0',
+        projectId: project.id,
+        userId
+      });
+
+      return { project: { projectId: project.id } };
     }
   });
 
-  // AUTHENTICATION
+  server.route({
+    method: 'GET',
+    path: '/api/projects/{projectId}',
+    options: {
+      validate: {
+        params: {
+          projectId: joi.number().required()
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const { userId } = <IAuthArtifact> request.auth.artifacts;
+
+      const projectId = <number> _.get(request, 'params.projectId');
+
+      await checkProjectPermissions(userId, projectId, 1);
+
+      const project = await models.Project.findById(projectId);
+
+      return { project: { projectId, name: project.name } };
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/projects',
+    options: {
+      auth: false,
+    },
+    handler: async (request, h) => {
+      return { projects: [] };
+    }
+  });
 
   server.route({
     method: 'GET',
@@ -149,6 +217,8 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       return { clients: [] };
     }
   });
+
+  // AUTHENTICATION
 
   server.route({
     method: 'POST',
