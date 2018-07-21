@@ -5,6 +5,15 @@ import * as inert from 'inert';
 import * as path from 'path';
 import * as Sequelize from 'sequelize';
 import * as Boom from 'boom';
+import * as models from '../../models';
+
+function payloadObject(payload: Hapi.Request['payload']): object {
+  if (payload && typeof payload == 'object') {
+    return payload;
+  } else {
+    throw Boom.badRequest('malformed payload: ' + payload);
+  }
+}
 
 const authPlugin = {
   pkg: {
@@ -56,7 +65,8 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     port: port || 3000,
     host: '0.0.0.0',
     debug: {
-      request: process.env.NODE_ENV === 'test' ? false : ['error']
+      // request: process.env.NODE_ENV === 'test' ? false : ['error']
+      request: false ? false : ['error']
     },
     routes: {
       files: {
@@ -69,6 +79,11 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     _.set(serverConfig, 'routes.cors.origin', ['*']);
   }
   const server = new Hapi.Server(serverConfig);
+
+  server.events.on('stop', async () => {
+    await sequelize.close();
+    console.log('Server stopped');
+  });
 
   await server.register([
     inert,
@@ -95,6 +110,12 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     }
   });
 
+  interface ICreateUser {
+    email: string,
+    name: string,
+    password: string
+  };
+
   server.route({
     method: 'POST',
     path: '/api/users',
@@ -102,7 +123,17 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       auth: false
     },
     handler: async (request, h) => {
-      return { sessionId: 'id', user: {} };
+      const { email, name, password } = <ICreateUser> request.payload;
+
+      const user = await models.User.create({
+        email,
+        name,
+        password
+      });
+
+      return {
+        sessionId: 'id',
+      };
     }
   });
 

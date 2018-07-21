@@ -1,4 +1,5 @@
 import * as Hapi from 'hapi';
+import * as uuid from 'uuid/v1';
 import axios from 'axios';
 import buildServer from  '../../src/server/buildServer';
 
@@ -10,14 +11,20 @@ beforeAll(async () => {
   return server.start();
 });
 
-afterAll(async () => {
+afterAll(() => {
+  // https://github.com/sequelize/sequelize/issues/6758
   return server.stop();
 });
 
 test('create user returns user and session id', async () => {
-  const response = await axios.post(`${BASE_URL}/users`);
-  const { user, sessionId } = response.data;
-  expect(user).not.toBeUndefined();
+  const response = await axios.post(`${BASE_URL}/users`, {
+      data: {
+        email: `uuid()@example.com`,
+        name: 'foo bar',
+        password: 'some pass'
+      }
+  });
+  const { sessionId } = response.data;
   expect(sessionId).not.toBeUndefined();
   return null;
 });

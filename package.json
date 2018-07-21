@@ -5,7 +5,7 @@
   "main": "startServer.ts",
   "scripts": {
     "client": "wp -w",
-    "test": "NODE_ENV=test jest",
+    "test": "NODE_ENV=test jest --forceExit",
     "production-client": "NODE_ENV=production wp",
     "start": "ts-node-dev startServer.ts",
     "production-start": "NODE_ENV=production ts-node startServer"

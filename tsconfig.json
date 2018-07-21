@@ -13,7 +13,7 @@
     "outDir": "./dist/",
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "sourceMap": true
   }
 }
