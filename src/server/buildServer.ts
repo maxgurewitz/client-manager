@@ -12,6 +12,12 @@ import * as uuid from 'uuid/v1';
 // 3 days in ms
 const SESSION_EXPIRATION = 1000 * 60 * 60 * 24 * 3;
 
+interface ISession {
+  expiration: number,
+  uuid: string,
+  userId: number
+}
+
 const authPlugin = {
   pkg: {
     name: 'custom-auth',
@@ -25,7 +31,7 @@ const authPlugin = {
             throw Boom.unauthorized('Must provide authorization header.');
           }
 
-          const session = await models.Session.findOne({
+          const session: ISession = await models.Session.findOne({
             where: {
               uuid: request.headers.authorization
             }
