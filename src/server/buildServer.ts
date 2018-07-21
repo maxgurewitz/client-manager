@@ -35,6 +35,10 @@ const authPlugin = {
             throw Boom.unauthorized('Invalid authorization header.');
           }
 
+          if (Date.now() > session.expiration) {
+            throw Boom.unauthorized('Session has expired');
+          }
+
           return h.authenticated({
             credentials: {
               sessionId: session.uuid,
