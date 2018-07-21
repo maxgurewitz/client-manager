@@ -5,15 +5,8 @@ import * as inert from 'inert';
 import * as path from 'path';
 import * as Sequelize from 'sequelize';
 import * as Boom from 'boom';
+import * as bcrypt from 'bcrypt';
 import * as models from '../../models';
-
-function payloadObject(payload: Hapi.Request['payload']): object {
-  if (payload && typeof payload == 'object') {
-    return payload;
-  } else {
-    throw Boom.badRequest('malformed payload: ' + payload);
-  }
-}
 
 const authPlugin = {
   pkg: {
@@ -24,8 +17,9 @@ const authPlugin = {
     server.auth.scheme('custom-auth', server => {
       return {
         async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+          console.log('loc1', request.headers);
           if (!request.headers.authorization) {
-            throw Boom.unauthorized('Must provide authorization');
+            throw Boom.unauthorized('Must provide authorization header');
           }
 
           return h.authenticated({
@@ -94,6 +88,15 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
 
   server.auth.default('session');
 
+
+  server.route({
+    method: 'GET',
+    path: '/api/clients',
+    handler: async (request, h) => {
+      return { clients: [] };
+    }
+  });
+
   server.route({
     method: 'POST',
     path: '/api/logout',
@@ -124,11 +127,12 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     },
     handler: async (request, h) => {
       const { email, name, password } = <ICreateUser> request.payload;
+      const encryptedPassword = await bcrypt.hash(password, 10);
 
       const user = await models.User.create({
         email,
         name,
-        password
+        password: encryptedPassword
       });
 
       return {

@@ -22,6 +22,7 @@
   "homepage": "https://github.com/maxgurewitz/client-manager#readme",
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/bcrypt": "^2.0.0",
     "@types/bluebird": "^3.5.21",
     "@types/hapi": "^17.0.13",
     "@types/inert": "^5.1.1",
@@ -46,6 +47,7 @@
   "dependencies": {
     "@types/boom": "^7.2.0",
     "@types/joi": "^13.4.0",
+    "bcrypt": "^3.0.0",
     "bluebird": "^3.5.1",
     "boom": "^7.2.0",
     "hapi": "^17.5.2",
