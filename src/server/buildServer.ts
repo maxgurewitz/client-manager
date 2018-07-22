@@ -130,6 +130,15 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       request: ['error']
     },
     routes: {
+      validate: {
+        failAction: async (request, h, err) => {
+          if (process.env.NODE_ENV === 'production') {
+            throw Boom.badRequest('Invalid request payload input');
+          } else {
+            throw err;
+          }
+        }
+      },
       files: {
         relativeTo: path.join(__dirname, '..', '..', 'dist')
       }
@@ -178,7 +187,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
         userId
       });
 
-      return { project: { projectId: project.id } };
+      return { project: { id: project.id } };
     }
   });
 
@@ -201,7 +210,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
 
       const project = await models.Project.findById(projectId);
 
-      return { project: { projectId, name: project.name } };
+      return { project: { id: projectId, name: project.name } };
     }
   });
 
@@ -232,6 +241,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     options: {
       validate: {
         payload: {
+          projectId: joi.number().required(),
           targetId: joi.number().required(),
           level: joi.number().only(0, 1).required()
         }
@@ -330,6 +340,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       });
 
       return {
+        user: { id: user.id },
         sessionId
       };
     }

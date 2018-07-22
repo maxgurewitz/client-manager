@@ -4,6 +4,7 @@ import * as uuid from 'uuid/v1';
 import axios from 'axios';
 import buildServer from  '../../src/server/buildServer';
 
+global.Promise = Bluebird;
 const BASE_URL = 'http://localhost:3000/api';
 let server : Hapi.Server;
 
@@ -17,7 +18,48 @@ afterAll(() => {
   return server.stop();
 });
 
-test.only('project creator can assign permissions', async () => {
+test('project creator can assign permissions', async () => {
+  const [userResponse1, userResponse2] = await Bluebird.all([
+    axios.post(`${BASE_URL}/users`, {
+      email: `${uuid()}@example.com`,
+      name: 'foo bar',
+      password: 'some pass'
+    }),
+    axios.post(`${BASE_URL}/users`, {
+      email: `${uuid()}@example.com`,
+      name: 'foo bar',
+      password: 'some pass'
+    })
+  ]);
+
+  const projectResponse = await axios(`${BASE_URL}/projects`, {
+    method: 'post',
+    data: {
+      name: uuid()
+    },
+    headers: {
+      authorization: userResponse1.data.sessionId
+    }
+  });
+
+  await axios(`${BASE_URL}/permissions`, {
+    method: 'post',
+    data: {
+      level: 1,
+      projectId: projectResponse.data.project.id,
+      targetId: userResponse2.data.user.id
+    },
+    headers: {
+      authorization: userResponse1.data.sessionId
+    }
+  });
+
+  await axios(`${BASE_URL}/projects/${projectResponse.data.project.id}`, {
+    method: 'get',
+    headers: {
+      authorization: userResponse2.data.sessionId
+    }
+  });
   return null;
 });
 
@@ -57,7 +99,7 @@ test('creator of project has authorization for that project, not for other proje
   ]);
 
   // can retrieve one's own project
-  await axios(`${BASE_URL}/projects/${projectResponse1.data.project.projectId}`, {
+  await axios(`${BASE_URL}/projects/${projectResponse1.data.project.id}`, {
     method: 'get',
     headers: {
       authorization: userResponse1.data.sessionId
@@ -66,7 +108,7 @@ test('creator of project has authorization for that project, not for other proje
 
   // can't retrieve other project
   try {
-    await axios(`${BASE_URL}/projects/${projectResponse2.data.project.projectId}`, {
+    await axios(`${BASE_URL}/projects/${projectResponse2.data.project.id}`, {
       method: 'get',
       headers: {
         authorization: userResponse1.data.sessionId
