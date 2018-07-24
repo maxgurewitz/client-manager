@@ -48,6 +48,12 @@ interface ICreatePermission {
   level: number
 };
 
+async function getProject(projectId: number, userId: number) {
+  await checkProjectPermissions(userId, projectId, 1);
+  const project = await models.Project.findById(projectId);
+  return { project: { id: projectId, name: project.name } };
+}
+
 async function checkProjectPermissions(userId: number, projectId: number, maxPermissionLevel: number) {
   const permission = await models.Permission.findOne({
     where: {
@@ -87,6 +93,7 @@ const authPlugin = {
           }
 
           if (Date.now() > session.expiration) {
+            // FIXME soft delete session
             throw Boom.unauthorized('Session has expired');
           }
 
@@ -181,13 +188,38 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
 
       const project = await models.Project.create({ name });
 
-      const permission = await models.Permission.create({
+      await models.Permission.create({
         level: '0',
         projectId: project.id,
         userId
       });
 
       return { project: { id: project.id } };
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/projects/latest',
+    handler: async (request, h) => {
+      const { userId } = <IAuthArtifact> request.auth.artifacts;
+
+      const lastPermission = await models.Permission.findOne({
+          where: {
+            userId
+          },
+          order: ['createdAt', 'DESC']
+      });
+
+      if (!lastPermission) {
+        throw Boom.forbidden('Lacking permissions for any project.');
+      }
+
+      const { projectId } = lastPermission;
+
+      const project = await models.Project.findById(projectId);
+
+      return { project: { id: projectId, name: project.name } };
     }
   });
 
@@ -269,6 +301,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     handler: async (request, h) => {
       const credentials = <ICredentials> request.auth.credentials;
 
+      // FIXME soft delete
       await models.Session.destroy({
         where: {
           uuid: credentials.sessionId

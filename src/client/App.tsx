@@ -3,7 +3,9 @@ import { Redirect, BrowserRouter, Route, Switch, Link } from 'react-router-dom'
 import * as qs from 'qs';
 import * as _ from 'lodash';
 import * as Bluebird from 'bluebird';
-import axios from 'axios';
+import axios, {AxiosRequestConfig, AxiosError} from 'axios';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 
 const NoMatch = () => (
   <div> 404 </div>
@@ -35,53 +37,30 @@ const Loading = () => (
   </div>
 );
 
-function randomString(length: number) {
-    const bytes = new Uint8Array(length);
-    const randomArray = crypto.getRandomValues(bytes);
-    // circumvents TS type bug
-    const random = randomArray ? randomArray.toString().split(',').map(Number) : [];
-    const result = [];
-    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~'
-
-    for (let i = 0; i < random.length; i++) {
-      const randomNumber = random[i];
-      result.push(charset[randomNumber % charset.length]);
-    };
-    return result.join('');
-}
-
-const auth0ClientId = 'mhPJFvws1P7XvymutlWdQwUnCzItPlI3';
-const auth0AuthorizeUrl = 'https://maxthegeek1.auth0.com/authorize';
-
-const PublicHomePage = () => {
-  const nonce = randomString(16);
-  localStorage.setItem('nonce', nonce);
-
-  const auth0Params = {
-    nonce,
-    audience: 'https://maxthegeek1.auth0.com/api/v2/',
-    redirect_uri: location.origin,
-    response_type: 'token id_token',
-    client_id: auth0ClientId
-  };
-  const href = `${auth0AuthorizeUrl}?${qs.stringify(auth0Params)}`;
-
+const PublicHomePage = ({handleChange, state}: {handleChange: any, state: State}) => {
   return (
     <div>
-      <a href={href}>
-        Login/Register
-      </a>
+      <TextField id="email" label="Email" onChange={handleChange('userForm.email')} value={state.userForm.email}/>
+      <TextField id="password" label="Password" type="password" onChange={handleChange('userForm.password')} value={state.userForm.password}/>
+      <TextField id="name" label="Full Name" onChange={handleChange('userForm.name')} value={state.userForm.name}/>
+      <Button variant="contained" color="primary">
+        Register
+      </Button>
     </div>
   );
 };
 
 interface State {
-  authenticationInProgress: boolean,
+  userForm: {
+    email: string,
+    password: string,
+    name: string
+  },
+  loadingProject: boolean,
   isAuthenticated: boolean,
   isAuthorized: boolean,
   projectId: string | null,
-  nonce: string | null,
-  accessToken: string | null
+  sessionId: string | null
 };
 
 export const App = class App extends React.Component<any, State> {
@@ -89,66 +68,101 @@ export const App = class App extends React.Component<any, State> {
     super(props);
 
     const hashParams = qs.parse(location.hash.substring(1));
-    const accessToken = hashParams.access_token || localStorage.getItem('accessToken');
-    const nonce = localStorage.getItem('nonce');
+    const sessionId = localStorage.getItem('sessionId') || null;
 
-    let authenticationInProgress = false;
+    let loadingProject = false;
 
-    if (accessToken && nonce) {
-      authenticationInProgress = true;
-      this.requestAuthentication(accessToken, nonce);
+    if (sessionId) {
+      loadingProject = true;
+      this.loadProject(sessionId);
     }
 
     const state = {
-      authenticationInProgress,
+      userForm: {
+        email: '',
+        password: '',
+        name: ''
+      },
+      loadingProject,
       isAuthenticated: false,
       isAuthorized: false,
       projectId: null,
-      nonce,
-      accessToken
+      sessionId
     };
 
     this.state = state;
   }
 
-  requestAuthentication(accessToken: string, nonce: string) : Promise<void> {
-    return axios({
-      url: '/api/authenticate',
-      headers: {
-        Authentication: `Bearer ${accessToken}`
-      },
-      data: {
-        nonce
-      }
-    })
-    .then(({ data }) => {
-      const { projectId } = data;
+  handleChange = path => event => {
+    const value = event.target.value;
+    this.setState(state =>
+      _.set(state, path, value)
+    );
+  };
 
-      localStorage.setItem('accessToken', accessToken);
+  async request(config: AxiosRequestConfig, sessionId?: string) {
+    _.set(config, 'headers.Authentication', sessionId || this.state.sessionId);
+
+    try {
+      const {data} = await axios(config);
+      return data;
+    } catch (e) {
+      const error = e as AxiosError;
+      const status: number = _.get(error, 'response.status');
+
+      if (status === 401) {
+        localStorage.removeItem('sessionId');
+        this.setState({
+          sessionId: null,
+          isAuthorized: false,
+          isAuthenticated: false
+        });
+      } else if (status === 403) {
+        this.setState({
+          isAuthorized: false,
+          isAuthenticated: true
+        });
+      }
+
+      throw e;
+    }
+  }
+
+  async register() {
+    const {name, email, password } = this.state.userForm;
+    return this.request({
+      method: 'post',
+      url: '/api/users',
+      data: { name, email, password }
+    })
+    .then(({sessionId}) => {
+      localStorage.setItem('sessionId', sessionId);
+      
       this.setState({
-        projectId,
-        authenticationInProgress: false,
+        sessionId,
+        isAuthenticated: true
+      });
+    });
+  }
+
+  async loadProject(sessionId: string) {
+    return this.request({
+      url: '/api/project/latest'
+    }, sessionId)
+    .then(({ data }) => {
+      const { project } = data;
+
+      this.setState({
+        projectId: project.projectId,
+        loadingProject: false,
         isAuthorized: true,
         isAuthenticated: true
       });
     })
     .catch(e => {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('nonce');
-
-      if (e.response.status === '403') {
-        this.setState({
-          authenticationInProgress: false,
-          isAuthorized: false,
-          isAuthenticated: true
-        });
-      } else {
-        this.setState({
-          authenticationInProgress: false,
-          isAuthorized: false,
-          isAuthenticated: false
-        });
-      }
+      this.setState({
+        loadingProject: false
+      });
     });
   }
 
@@ -158,7 +172,7 @@ export const App = class App extends React.Component<any, State> {
         <Route path="/" render={(routerProps) => {
           let component;
 
-          if (this.state.authenticationInProgress) {
+          if (this.state.loadingProject) {
             component = <Loading/>;
           } else if (this.state.isAuthenticated && !this.state.projectId) {
             component = (
@@ -172,7 +186,7 @@ export const App = class App extends React.Component<any, State> {
           } else if (!this.state.isAuthenticated) {
             /* FIXME replace with Switch */
             if (routerProps.location.pathname === '/') {
-              component = <PublicHomePage/>;
+              component = <PublicHomePage handleChange={this.handleChange} state={this.state}/>;
             } else {
               component = <Redirect to="/"/>;
             }
