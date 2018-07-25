@@ -44675,12 +44675,12 @@ var Register = function () { return (React.createElement("div", null, "Create Pr
 var AuthorizationPending = function () { return (React.createElement("div", null, "Authorization Pending")); };
 var Loading = function () { return (React.createElement("div", null, "loading")); };
 var PublicHomePage = function (_a) {
-    var handleChange = _a.handleChange, state = _a.state;
+    var createUser = _a.createUser, handleChange = _a.handleChange, state = _a.state;
     return (React.createElement("div", null,
         React.createElement(TextField_1["default"], { id: "email", label: "Email", onChange: handleChange('userForm.email'), value: state.userForm.email }),
         React.createElement(TextField_1["default"], { id: "password", label: "Password", type: "password", onChange: handleChange('userForm.password'), value: state.userForm.password }),
         React.createElement(TextField_1["default"], { id: "name", label: "Full Name", onChange: handleChange('userForm.name'), value: state.userForm.name }),
-        React.createElement(Button_1["default"], { variant: "contained", color: "primary" }, "Register")));
+        React.createElement(Button_1["default"], { variant: "contained", color: "primary", onClick: createUser }, "Register")));
 };
 ;
 exports.App = /** @class */ (function (_super) {
@@ -44713,6 +44713,7 @@ exports.App = /** @class */ (function (_super) {
             sessionId: sessionId
         };
         _this.state = state;
+        _this.createUser = _this.createUser.bind(_this);
         return _this;
     }
     App.prototype.request = function (config, sessionId) {
@@ -44753,49 +44754,57 @@ exports.App = /** @class */ (function (_super) {
             });
         });
     };
-    App.prototype.register = function () {
+    App.prototype.createUser = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, name, email, password;
-            var _this = this;
+            var _a, name, email, password, sessionId;
             return __generator(this, function (_b) {
-                _a = this.state.userForm, name = _a.name, email = _a.email, password = _a.password;
-                return [2 /*return*/, this.request({
-                        method: 'post',
-                        url: '/api/users',
-                        data: { name: name, email: email, password: password }
-                    })
-                        .then(function (_a) {
-                        var sessionId = _a.sessionId;
+                switch (_b.label) {
+                    case 0:
+                        _a = this.state.userForm, name = _a.name, email = _a.email, password = _a.password;
+                        return [4 /*yield*/, this.request({
+                                method: 'post',
+                                url: '/api/users',
+                                data: { name: name, email: email, password: password }
+                            })];
+                    case 1:
+                        sessionId = (_b.sent()).sessionId;
                         localStorage.setItem('sessionId', sessionId);
-                        _this.setState({
+                        this.setState({
                             sessionId: sessionId,
                             isAuthenticated: true
                         });
-                    })];
+                        return [2 /*return*/];
+                }
             });
         });
     };
     App.prototype.loadProject = function (sessionId) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
+            var project, e_2;
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.request({
-                        url: '/api/project/latest'
-                    }, sessionId)
-                        .then(function (_a) {
-                        var data = _a.data;
-                        var project = data.project;
-                        _this.setState({
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.request({
+                                url: '/api/project/latest'
+                            }, sessionId)];
+                    case 1:
+                        project = (_a.sent()).project;
+                        this.setState({
                             projectId: project.projectId,
                             loadingProject: false,
                             isAuthorized: true,
                             isAuthenticated: true
                         });
-                    })["catch"](function (e) {
-                        _this.setState({
+                        return [3 /*break*/, 3];
+                    case 2:
+                        e_2 = _a.sent();
+                        this.setState({
                             loadingProject: false
                         });
-                    })];
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/, null];
+                }
             });
         });
     };
@@ -44818,7 +44827,7 @@ exports.App = /** @class */ (function (_super) {
                     else if (!_this.state.isAuthenticated) {
                         /* FIXME replace with Switch */
                         if (routerProps.location.pathname === '/') {
-                            component = React.createElement(PublicHomePage, { handleChange: _this.handleChange, state: _this.state });
+                            component = React.createElement(PublicHomePage, { handleChange: _this.handleChange, state: _this.state, createUser: _this.createUser });
                         }
                         else {
                             component = React.createElement(react_router_dom_1.Redirect, { to: "/" });

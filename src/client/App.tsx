@@ -37,13 +37,13 @@ const Loading = () => (
   </div>
 );
 
-const PublicHomePage = ({handleChange, state}: {handleChange: any, state: State}) => {
+const PublicHomePage = ({createUser, handleChange, state}: {createUser: any, handleChange: any, state: State}) => {
   return (
     <div>
       <TextField id="email" label="Email" onChange={handleChange('userForm.email')} value={state.userForm.email}/>
       <TextField id="password" label="Password" type="password" onChange={handleChange('userForm.password')} value={state.userForm.password}/>
       <TextField id="name" label="Full Name" onChange={handleChange('userForm.name')} value={state.userForm.name}/>
-      <Button variant="contained" color="primary">
+      <Button variant="contained" color="primary" onClick={createUser}>
         Register
       </Button>
     </div>
@@ -91,6 +91,7 @@ export const App = class App extends React.Component<any, State> {
     };
 
     this.state = state;
+    this.createUser = this.createUser.bind(this);
   }
 
   handleChange = path => event => {
@@ -128,29 +129,28 @@ export const App = class App extends React.Component<any, State> {
     }
   }
 
-  async register() {
-    const {name, email, password } = this.state.userForm;
-    return this.request({
+  async createUser() {
+    const { name, email, password } = this.state.userForm;
+
+    const { sessionId } = await this.request({
       method: 'post',
       url: '/api/users',
       data: { name, email, password }
-    })
-    .then(({sessionId}) => {
-      localStorage.setItem('sessionId', sessionId);
-      
-      this.setState({
-        sessionId,
-        isAuthenticated: true
-      });
+    });
+
+    localStorage.setItem('sessionId', sessionId);
+
+    this.setState({
+      sessionId,
+      isAuthenticated: true
     });
   }
 
   async loadProject(sessionId: string) {
-    return this.request({
-      url: '/api/project/latest'
-    }, sessionId)
-    .then(({ data }) => {
-      const { project } = data;
+    try {
+      const { project } = await this.request({
+        url: '/api/project/latest'
+      }, sessionId);
 
       this.setState({
         projectId: project.projectId,
@@ -158,12 +158,12 @@ export const App = class App extends React.Component<any, State> {
         isAuthorized: true,
         isAuthenticated: true
       });
-    })
-    .catch(e => {
+    } catch (e) {
       this.setState({
         loadingProject: false
       });
-    });
+    }
+    return null;
   }
 
   render() {
@@ -186,7 +186,7 @@ export const App = class App extends React.Component<any, State> {
           } else if (!this.state.isAuthenticated) {
             /* FIXME replace with Switch */
             if (routerProps.location.pathname === '/') {
-              component = <PublicHomePage handleChange={this.handleChange} state={this.state}/>;
+              component = <PublicHomePage handleChange={this.handleChange} state={this.state} createUser={this.createUser}/>;
             } else {
               component = <Redirect to="/"/>;
             }
