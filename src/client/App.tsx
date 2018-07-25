@@ -50,7 +50,7 @@ const PublicHomePage = ({createUser, handleChange, state}: {createUser: any, han
   );
 };
 
-interface State {
+interface State   {
   userForm: {
     email: string,
     password: string,
@@ -102,7 +102,7 @@ export const App = class App extends React.Component<any, State> {
   };
 
   async request(config: AxiosRequestConfig, sessionId?: string) {
-    _.set(config, 'headers.Authentication', sessionId || this.state.sessionId);
+    _.set(config, 'headers.Authorization', sessionId || this.state.sessionId);
 
     try {
       const {data} = await axios(config);
@@ -148,10 +148,11 @@ export const App = class App extends React.Component<any, State> {
 
   async loadProject(sessionId: string) {
     try {
-      const { project } = await this.request({
-        url: '/api/project/latest'
+      const response = await this.request({
+        url: '/api/projects/latest'
       }, sessionId);
 
+      const {project} = response;
       this.setState({
         projectId: project.projectId,
         loadingProject: false,

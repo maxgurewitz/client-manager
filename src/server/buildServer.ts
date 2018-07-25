@@ -208,7 +208,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
           where: {
             userId
           },
-          order: ['createdAt', 'DESC']
+          order: [['createdAt', 'DESC']]
       });
 
       if (!lastPermission) {

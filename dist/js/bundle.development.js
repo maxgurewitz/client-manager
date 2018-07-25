@@ -44722,7 +44722,7 @@ exports.App = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _.set(config, 'headers.Authentication', sessionId || this.state.sessionId);
+                        _.set(config, 'headers.Authorization', sessionId || this.state.sessionId);
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
@@ -44780,16 +44780,17 @@ exports.App = /** @class */ (function (_super) {
     };
     App.prototype.loadProject = function (sessionId) {
         return __awaiter(this, void 0, void 0, function () {
-            var project, e_2;
+            var response, project, e_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         return [4 /*yield*/, this.request({
-                                url: '/api/project/latest'
+                                url: '/api/projects/latest'
                             }, sessionId)];
                     case 1:
-                        project = (_a.sent()).project;
+                        response = _a.sent();
+                        project = response.project;
                         this.setState({
                             projectId: project.projectId,
                             loadingProject: false,
