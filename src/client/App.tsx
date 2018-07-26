@@ -56,11 +56,24 @@ interface State   {
     password: string,
     name: string
   },
+  projectForm: {
+    name: string
+  },
   loadingProject: boolean,
   isAuthenticated: boolean,
   isAuthorized: boolean,
   projectId: string | null,
   sessionId: string | null
+};
+
+const emptyUserForm = {
+  email: '',
+  password: '',
+  name: ''
+};
+
+const emptyProjectForm = {
+  name: ''
 };
 
 export const App = class App extends React.Component<any, State> {
@@ -78,11 +91,8 @@ export const App = class App extends React.Component<any, State> {
     }
 
     const state = {
-      userForm: {
-        email: '',
-        password: '',
-        name: ''
-      },
+      userForm: emptyUserForm,
+      projectForm: emptyProjectForm,
       loadingProject,
       isAuthenticated: false,
       isAuthorized: false,
@@ -92,6 +102,7 @@ export const App = class App extends React.Component<any, State> {
 
     this.state = state;
     this.createUser = this.createUser.bind(this);
+    this.createProject = this.createProject.bind(this);
   }
 
   handleChange = path => event => {
@@ -142,17 +153,17 @@ export const App = class App extends React.Component<any, State> {
 
     this.setState({
       sessionId,
+      userForm: emptyUserForm,
       isAuthenticated: true
     });
   }
 
   async loadProject(sessionId: string) {
     try {
-      const response = await this.request({
+      const { project } = await this.request({
         url: '/api/projects/latest'
       }, sessionId);
 
-      const {project} = response;
       this.setState({
         projectId: project.projectId,
         loadingProject: false,
@@ -164,6 +175,23 @@ export const App = class App extends React.Component<any, State> {
         loadingProject: false
       });
     }
+    return null;
+  }
+
+  async createProject() {
+    const { project } = await this.request({
+      method: 'post',
+      url: '/api/projects',
+      data: {
+        name: this.state.projectForm.name
+      }
+    });
+
+    this.setState({
+      projectForm: emptyProjectForm,
+      projectId: project.id,
+      isAuthorized: true
+    });
     return null;
   }
 

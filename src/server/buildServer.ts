@@ -206,7 +206,11 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
 
       const lastPermission = await models.Permission.findOne({
           where: {
-            userId
+            userId,
+            $or: [
+              { level: { $eq: '0' } },
+              { level: { $eq: '1' } }
+            ]
           },
           order: [['createdAt', 'DESC']]
       });
@@ -275,7 +279,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
         payload: {
           projectId: joi.number().required(),
           targetId: joi.number().required(),
-          level: joi.number().only(0, 1).required()
+          level: joi.number().only(0, 1, 2).required()
         }
       }
     },
@@ -283,7 +287,9 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       const { userId } = <IAuthArtifact> request.auth.artifacts;
       const { projectId, targetId, level } = <ICreatePermission> request.payload;
 
-      await checkProjectPermissions(userId, projectId, 0);
+      if (level < 2) {
+        await checkProjectPermissions(userId, projectId, 0);
+      }
 
       await models.Permission.upsert({
         level: String(level),

@@ -44683,6 +44683,14 @@ var PublicHomePage = function (_a) {
         React.createElement(Button_1["default"], { variant: "contained", color: "primary", onClick: createUser }, "Register")));
 };
 ;
+var emptyUserForm = {
+    email: '',
+    password: '',
+    name: ''
+};
+var emptyProjectForm = {
+    name: ''
+};
 exports.App = /** @class */ (function (_super) {
     __extends(App, _super);
     function App(props) {
@@ -44701,11 +44709,8 @@ exports.App = /** @class */ (function (_super) {
             _this.loadProject(sessionId);
         }
         var state = {
-            userForm: {
-                email: '',
-                password: '',
-                name: ''
-            },
+            userForm: emptyUserForm,
+            projectForm: emptyProjectForm,
             loadingProject: loadingProject,
             isAuthenticated: false,
             isAuthorized: false,
@@ -44714,6 +44719,7 @@ exports.App = /** @class */ (function (_super) {
         };
         _this.state = state;
         _this.createUser = _this.createUser.bind(_this);
+        _this.createProject = _this.createProject.bind(_this);
         return _this;
     }
     App.prototype.request = function (config, sessionId) {
@@ -44771,6 +44777,7 @@ exports.App = /** @class */ (function (_super) {
                         localStorage.setItem('sessionId', sessionId);
                         this.setState({
                             sessionId: sessionId,
+                            userForm: emptyUserForm,
                             isAuthenticated: true
                         });
                         return [2 /*return*/];
@@ -44780,7 +44787,7 @@ exports.App = /** @class */ (function (_super) {
     };
     App.prototype.loadProject = function (sessionId) {
         return __awaiter(this, void 0, void 0, function () {
-            var response, project, e_2;
+            var project, e_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -44789,8 +44796,7 @@ exports.App = /** @class */ (function (_super) {
                                 url: '/api/projects/latest'
                             }, sessionId)];
                     case 1:
-                        response = _a.sent();
-                        project = response.project;
+                        project = (_a.sent()).project;
                         this.setState({
                             projectId: project.projectId,
                             loadingProject: false,
@@ -44805,6 +44811,30 @@ exports.App = /** @class */ (function (_super) {
                         });
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/, null];
+                }
+            });
+        });
+    };
+    App.prototype.createProject = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var project;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.request({
+                            method: 'post',
+                            url: '/api/projects',
+                            data: {
+                                name: this.state.projectForm.name
+                            }
+                        })];
+                    case 1:
+                        project = (_a.sent()).project;
+                        this.setState({
+                            projectForm: emptyProjectForm,
+                            projectId: project.id,
+                            isAuthorized: true
+                        });
+                        return [2 /*return*/, null];
                 }
             });
         });
