@@ -169,7 +169,7 @@ export const App = class App extends React.Component<any, State> {
       }, sessionId);
 
       this.setState({
-        projectId: project.projectId,
+        projectId: project.id,
         loadingProject: false,
         isAuthorized: true,
         isAuthenticated: true

@@ -44803,7 +44803,7 @@ exports.App = /** @class */ (function (_super) {
                     case 1:
                         project = (_a.sent()).project;
                         this.setState({
-                            projectId: project.projectId,
+                            projectId: project.id,
                             loadingProject: false,
                             isAuthorized: true,
                             isAuthenticated: true
