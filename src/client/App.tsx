@@ -17,12 +17,16 @@ const Dashboard = () => (
   </div>
 );
 
-const Register = () => (
-  <div>
-    Create Project
-    Register With Existing Project
-  </div>
-);
+const CreateProject = ({createProject, handleChange, state}: {createProject: any, handleChange: any, state: State}) => {
+  return (
+    <div>
+      <TextField id="name" label="Project Name" onChange={handleChange('projectForm.name')} value={state.projectForm.name}/>
+      <Button variant="contained" color="primary" onClick={createProject}>
+        Create Project
+      </Button>
+    </div>
+  );
+}
 
 
 const AuthorizationPending = () => (
@@ -196,6 +200,7 @@ export const App = class App extends React.Component<any, State> {
   }
 
   render() {
+    const self = this;
     return (
       <BrowserRouter>
         <Route path="/" render={(routerProps) => {
@@ -206,7 +211,7 @@ export const App = class App extends React.Component<any, State> {
           } else if (this.state.isAuthenticated && !this.state.projectId) {
             component = (
               <Switch>
-                <Route exact path="/register" component={Register}/>
+                <Route exact path="/register" render={() => <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state}/>}/>
                 <Route render={() => <Redirect to="/register"/>}/>
               </Switch>
             );
@@ -225,7 +230,7 @@ export const App = class App extends React.Component<any, State> {
               <Switch>
                 <Route exact path="/" render={() => <Redirect to="/dashboard"/>}/>
                 <Route exact path="/dashboard" component={Dashboard}/>
-                <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <Register/>}/>
+                <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state}/>}/>
                 <Route exact path="/authorization-pending" component={AuthorizationPending}/>
                 <Route component={NoMatch}/>
               </Switch>

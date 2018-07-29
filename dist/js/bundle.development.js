@@ -44671,7 +44671,12 @@ var TextField_1 = __webpack_require__(/*! @material-ui/core/TextField */ "./node
 var Button_1 = __webpack_require__(/*! @material-ui/core/Button */ "./node_modules/@material-ui/core/Button/index.js");
 var NoMatch = function () { return (React.createElement("div", null, " 404 ")); };
 var Dashboard = function () { return (React.createElement("div", null, "Home")); };
-var Register = function () { return (React.createElement("div", null, "Create Project Register With Existing Project")); };
+var CreateProject = function (_a) {
+    var createProject = _a.createProject, handleChange = _a.handleChange, state = _a.state;
+    return (React.createElement("div", null,
+        React.createElement(TextField_1["default"], { id: "name", label: "Project Name", onChange: handleChange('projectForm.name'), value: state.projectForm.name }),
+        React.createElement(Button_1["default"], { variant: "contained", color: "primary", onClick: createProject }, "Create Project")));
+};
 var AuthorizationPending = function () { return (React.createElement("div", null, "Authorization Pending")); };
 var Loading = function () { return (React.createElement("div", null, "loading")); };
 var PublicHomePage = function (_a) {
@@ -44841,6 +44846,7 @@ exports.App = /** @class */ (function (_super) {
     };
     App.prototype.render = function () {
         var _this = this;
+        var self = this;
         return (React.createElement(react_router_dom_1.BrowserRouter, null,
             React.createElement(react_router_dom_1.Route, { path: "/", render: function (routerProps) {
                     var component;
@@ -44849,7 +44855,7 @@ exports.App = /** @class */ (function (_super) {
                     }
                     else if (_this.state.isAuthenticated && !_this.state.projectId) {
                         component = (React.createElement(react_router_dom_1.Switch, null,
-                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", component: Register }),
+                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return React.createElement(CreateProject, { handleChange: _this.handleChange, createProject: _this.createProject, state: _this.state }); } }),
                             React.createElement(react_router_dom_1.Route, { render: function () { return React.createElement(react_router_dom_1.Redirect, { to: "/register" }); } })));
                     }
                     else if (_this.state.isAuthenticated && !_this.state.isAuthorized && _this.state.projectId) {
@@ -44869,7 +44875,7 @@ exports.App = /** @class */ (function (_super) {
                         component = (React.createElement(react_router_dom_1.Switch, null,
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/", render: function () { return React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }); } }),
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/dashboard", component: Dashboard }),
-                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return _this.state.projectId ? React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }) : React.createElement(Register, null); } }),
+                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return _this.state.projectId ? React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }) : React.createElement(CreateProject, { handleChange: _this.handleChange, createProject: _this.createProject, state: _this.state }); } }),
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/authorization-pending", component: AuthorizationPending }),
                             React.createElement(react_router_dom_1.Route, { component: NoMatch })));
                     }

@@ -10,6 +10,8 @@ import * as models from '../../models';
 import * as uuid from 'uuid/v1';
 import * as joi from 'joi';
 
+const SQL = Sequelize.Op;
+
 // 3 days in ms
 const SESSION_EXPIRATION = 1000 * 60 * 60 * 24 * 3;
 
@@ -207,9 +209,9 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       const lastPermission = await models.Permission.findOne({
           where: {
             userId,
-            $or: [
-              { level: { $eq: '0' } },
-              { level: { $eq: '1' } }
+            [SQL.or]: [
+              { level: { [SQL.eq]: '0' } },
+              { level: { [SQL.eq]: '1' } }
             ]
           },
           order: [['createdAt', 'DESC']]
