@@ -11,9 +11,12 @@ const NoMatch = () => (
   <div> 404 </div>
 );
 
-const Dashboard = () => (
+const Dashboard = ({state, logout}, {state: State, logout: any}) => (
   <div>
     Home
+    <Button variant="contained" color="primary" onClick={logout}>
+      Log Out
+    </Button>
   </div>
 );
 
@@ -107,6 +110,7 @@ export const App = class App extends React.Component<any, State> {
     this.state = state;
     this.createUser = this.createUser.bind(this);
     this.createProject = this.createProject.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   handleChange = path => event => {
@@ -127,12 +131,7 @@ export const App = class App extends React.Component<any, State> {
       const status: number = _.get(error, 'response.status');
 
       if (status === 401) {
-        localStorage.removeItem('sessionId');
-        this.setState({
-          sessionId: null,
-          isAuthorized: false,
-          isAuthenticated: false
-        });
+        this.reset();
       } else if (status === 403) {
         this.setState({
           isAuthorized: false,
@@ -142,6 +141,16 @@ export const App = class App extends React.Component<any, State> {
 
       throw e;
     }
+  }
+
+  reset() {
+    localStorage.removeItem('sessionId');
+    this.setState({
+      projectId: null,
+      sessionId: null,
+      isAuthorized: false,
+      isAuthenticated: false
+    });
   }
 
   async createUser() {
@@ -159,6 +168,14 @@ export const App = class App extends React.Component<any, State> {
       sessionId,
       userForm: emptyUserForm,
       isAuthenticated: true
+    });
+  }
+
+  async logout() {
+    this.reset();
+    return this.request({
+      method: 'post',
+      url: '/api/logout'
     });
   }
 
@@ -218,18 +235,18 @@ export const App = class App extends React.Component<any, State> {
           } else if (this.state.isAuthenticated && !this.state.isAuthorized && this.state.projectId) {
             component = <Redirect to="/authorization-pending"/>;
           } else if (!this.state.isAuthenticated) {
-            /* FIXME replace with Switch */
-            if (routerProps.location.pathname === '/') {
-              component = <PublicHomePage handleChange={this.handleChange} state={this.state} createUser={this.createUser}/>;
-            } else {
-              component = <Redirect to="/"/>;
-            }
+            component = (
+              <Switch>
+                <Route exact path="/" render={() => <PublicHomePage handleChange={this.handleChange} state={this.state} createUser={this.createUser}/>}/>
+                <Route render={() => <Redirect to="/"/>}/>
+              </Switch>
+            );
           } else {
             // when user is authenticated, authorized, and with projectId
             component = (
               <Switch>
                 <Route exact path="/" render={() => <Redirect to="/dashboard"/>}/>
-                <Route exact path="/dashboard" component={Dashboard}/>
+                <Route exact path="/dashboard" render={() => <Dashboard state={this.state} logout={this.logout}/>}/>
                 <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state}/>}/>
                 <Route exact path="/authorization-pending" component={AuthorizationPending}/>
                 <Route component={NoMatch}/>

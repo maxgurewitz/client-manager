@@ -44670,7 +44670,13 @@ var axios_1 = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 var TextField_1 = __webpack_require__(/*! @material-ui/core/TextField */ "./node_modules/@material-ui/core/TextField/index.js");
 var Button_1 = __webpack_require__(/*! @material-ui/core/Button */ "./node_modules/@material-ui/core/Button/index.js");
 var NoMatch = function () { return (React.createElement("div", null, " 404 ")); };
-var Dashboard = function () { return (React.createElement("div", null, "Home")); };
+var Dashboard = function (_a, _b) {
+    var state = _a.state, logout = _a.logout;
+    var State = _b.state, any = _b.logout;
+    return (React.createElement("div", null,
+        "Home",
+        React.createElement(Button_1["default"], { variant: "contained", color: "primary", onClick: logout }, "Log Out")));
+};
 var CreateProject = function (_a) {
     var createProject = _a.createProject, handleChange = _a.handleChange, state = _a.state;
     return (React.createElement("div", null,
@@ -44725,6 +44731,7 @@ exports.App = /** @class */ (function (_super) {
         _this.state = state;
         _this.createUser = _this.createUser.bind(_this);
         _this.createProject = _this.createProject.bind(_this);
+        _this.logout = _this.logout.bind(_this);
         return _this;
     }
     App.prototype.request = function (config, sessionId) {
@@ -44746,12 +44753,7 @@ exports.App = /** @class */ (function (_super) {
                         error = e_1;
                         status_1 = _.get(error, 'response.status');
                         if (status_1 === 401) {
-                            localStorage.removeItem('sessionId');
-                            this.setState({
-                                sessionId: null,
-                                isAuthorized: false,
-                                isAuthenticated: false
-                            });
+                            this.reset();
                         }
                         else if (status_1 === 403) {
                             this.setState({
@@ -44763,6 +44765,15 @@ exports.App = /** @class */ (function (_super) {
                     case 4: return [2 /*return*/];
                 }
             });
+        });
+    };
+    App.prototype.reset = function () {
+        localStorage.removeItem('sessionId');
+        this.setState({
+            projectId: null,
+            sessionId: null,
+            isAuthorized: false,
+            isAuthenticated: false
         });
     };
     App.prototype.createUser = function () {
@@ -44787,6 +44798,17 @@ exports.App = /** @class */ (function (_super) {
                         });
                         return [2 /*return*/];
                 }
+            });
+        });
+    };
+    App.prototype.logout = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                this.reset();
+                return [2 /*return*/, this.request({
+                        method: 'post',
+                        url: '/api/logout'
+                    })];
             });
         });
     };
@@ -44862,19 +44884,15 @@ exports.App = /** @class */ (function (_super) {
                         component = React.createElement(react_router_dom_1.Redirect, { to: "/authorization-pending" });
                     }
                     else if (!_this.state.isAuthenticated) {
-                        /* FIXME replace with Switch */
-                        if (routerProps.location.pathname === '/') {
-                            component = React.createElement(PublicHomePage, { handleChange: _this.handleChange, state: _this.state, createUser: _this.createUser });
-                        }
-                        else {
-                            component = React.createElement(react_router_dom_1.Redirect, { to: "/" });
-                        }
+                        component = (React.createElement(react_router_dom_1.Switch, null,
+                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/", render: function () { return React.createElement(PublicHomePage, { handleChange: _this.handleChange, state: _this.state, createUser: _this.createUser }); } }),
+                            React.createElement(react_router_dom_1.Route, { render: function () { return React.createElement(react_router_dom_1.Redirect, { to: "/" }); } })));
                     }
                     else {
                         // when user is authenticated, authorized, and with projectId
                         component = (React.createElement(react_router_dom_1.Switch, null,
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/", render: function () { return React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }); } }),
-                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/dashboard", component: Dashboard }),
+                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/dashboard", render: function () { return React.createElement(Dashboard, { state: _this.state, logout: _this.logout }); } }),
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return _this.state.projectId ? React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }) : React.createElement(CreateProject, { handleChange: _this.handleChange, createProject: _this.createProject, state: _this.state }); } }),
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/authorization-pending", component: AuthorizationPending }),
                             React.createElement(react_router_dom_1.Route, { component: NoMatch })));
