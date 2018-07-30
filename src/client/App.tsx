@@ -6,6 +6,9 @@ import * as Bluebird from 'bluebird';
 import axios, {AxiosRequestConfig, AxiosError} from 'axios';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import SwitchButton from '@material-ui/core/Switch';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const NoMatch = () => (
   <div> 404 </div>
@@ -44,15 +47,36 @@ const Loading = () => (
   </div>
 );
 
-const PublicHomePage = ({createUser, handleChange, state}: {createUser: any, handleChange: any, state: State}) => {
+const registerText = 'Register';
+const logInText = 'Log In';
+
+const PublicHomePage = ({login, createUser, handleChange, state}: {login: any, createUser: any, handleChange: any, state: State}) => {
+  const registerFields = (
+    <span>
+      <TextField id="name" label="Full Name" onChange={ handleChange('userForm.name') } value={ state.userForm.name }/>
+    </span>
+  );
+
   return (
     <div>
-      <TextField id="email" label="Email" onChange={handleChange('userForm.email')} value={state.userForm.email}/>
-      <TextField id="password" label="Password" type="password" onChange={handleChange('userForm.password')} value={state.userForm.password}/>
-      <TextField id="name" label="Full Name" onChange={handleChange('userForm.name')} value={state.userForm.name}/>
-      <Button variant="contained" color="primary" onClick={createUser}>
-        Register
+      <TextField id="email" label="Email" onChange={ handleChange('userForm.email') } value={ state.userForm.email }/>
+      <TextField id="password" label="Password" type="password" onChange={ handleChange('userForm.password') } value={ state.userForm.password }/>
+      { state.userForm.register ? registerFields : '' }
+      <Button variant="contained" color="primary" onClick={ state.userForm.register ? createUser : login }>
+        { state.userForm.register ? registerText : logInText }
       </Button>
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <SwitchButton
+              checked={ state.userForm.register }
+              onChange={ handleChange('userForm.register', 'checked') }
+              value="registerUser"
+            />
+          }
+          label={ !state.userForm.register ? registerText : logInText }
+        />
+      </FormGroup>
     </div>
   );
 };
@@ -61,6 +85,7 @@ interface State   {
   userForm: {
     email: string,
     password: string,
+    register: boolean,
     name: string
   },
   projectForm: {
@@ -76,6 +101,7 @@ interface State   {
 const emptyUserForm = {
   email: '',
   password: '',
+  register: false,
   name: ''
 };
 
@@ -111,10 +137,11 @@ export const App = class App extends React.Component<any, State> {
     this.createUser = this.createUser.bind(this);
     this.createProject = this.createProject.bind(this);
     this.logout = this.logout.bind(this);
+    this.login = this.login.bind(this);
   }
 
-  handleChange = path => event => {
-    const value = event.target.value;
+  handleChange = (path, eventPath = 'value') => event => {
+    const value = event.target[eventPath];
     this.setState(state =>
       _.set(state, path, value)
     );
@@ -166,7 +193,7 @@ export const App = class App extends React.Component<any, State> {
 
     this.setState({
       sessionId,
-      userForm: emptyUserForm,
+      userForm: _.clone(emptyUserForm),
       isAuthenticated: true
     });
   }
@@ -177,6 +204,36 @@ export const App = class App extends React.Component<any, State> {
       method: 'post',
       url: '/api/logout'
     });
+  }
+
+  async login() {
+    this.setState({ loadingProject: true });
+
+    try {
+      const { sessionId } = await this.request({
+        method: 'post',
+        url: '/api/login',
+        data: {
+          email: this.state.userForm.email,
+          password: this.state.userForm.password,
+        }
+      });
+
+      localStorage.setItem('sessionId', sessionId);
+
+      this.setState({
+        sessionId,
+        userForm: _.clone(emptyUserForm),
+        isAuthenticated: true
+      });
+
+      await this.loadProject(sessionId);
+    } catch (e) {
+      this.setState({
+        loadingProject: false
+      });
+    }
+    return null;
   }
 
   async loadProject(sessionId: string) {
@@ -237,7 +294,7 @@ export const App = class App extends React.Component<any, State> {
           } else if (!this.state.isAuthenticated) {
             component = (
               <Switch>
-                <Route exact path="/" render={() => <PublicHomePage handleChange={this.handleChange} state={this.state} createUser={this.createUser}/>}/>
+                <Route exact path="/" render={() => <PublicHomePage handleChange={this.handleChange} state={this.state} createUser={this.createUser} login={this.login}/>}/>
                 <Route render={() => <Redirect to="/"/>}/>
               </Switch>
             );

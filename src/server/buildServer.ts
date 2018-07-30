@@ -327,7 +327,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       validate: {
         payload: {
           email: joi.string().email().required(),
-          password: joi.string().required(),
+          password: joi.string().required().min(8),
         }
       }
     },
