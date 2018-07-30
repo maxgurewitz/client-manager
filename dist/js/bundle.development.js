@@ -46050,8 +46050,8 @@ exports.App = /** @class */ (function (_super) {
             _this.loadProject(sessionId);
         }
         var state = {
-            userForm: emptyUserForm,
-            projectForm: emptyProjectForm,
+            userForm: _.clone(emptyUserForm),
+            projectForm: _.clone(emptyProjectForm),
             loadingProject: loadingProject,
             isAuthenticated: false,
             isAuthorized: false,
@@ -46229,7 +46229,7 @@ exports.App = /** @class */ (function (_super) {
                     case 1:
                         project = (_a.sent()).project;
                         this.setState({
-                            projectForm: emptyProjectForm,
+                            projectForm: _.clone(emptyProjectForm),
                             projectId: project.id,
                             isAuthorized: true
                         });

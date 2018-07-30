@@ -124,8 +124,8 @@ export const App = class App extends React.Component<any, State> {
     }
 
     const state = {
-      userForm: emptyUserForm,
-      projectForm: emptyProjectForm,
+      userForm: _.clone(emptyUserForm),
+      projectForm: _.clone(emptyProjectForm),
       loadingProject,
       isAuthenticated: false,
       isAuthorized: false,
@@ -266,7 +266,7 @@ export const App = class App extends React.Component<any, State> {
     });
 
     this.setState({
-      projectForm: emptyProjectForm,
+      projectForm: _.clone(emptyProjectForm),
       projectId: project.id,
       isAuthorized: true
     });
