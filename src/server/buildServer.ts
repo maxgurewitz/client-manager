@@ -336,6 +336,10 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
         where: { email }
       });
 
+      if (!user) {
+        throw Boom.notFound('User not found');
+      }
+
       const isPasswordValid = bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
