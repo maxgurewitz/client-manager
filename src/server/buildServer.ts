@@ -95,7 +95,6 @@ const authPlugin = {
           }
 
           if (Date.now() > session.expiration) {
-            // FIXME soft delete session
             throw Boom.unauthorized('Session has expired');
           }
 
@@ -309,7 +308,6 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     handler: async (request, h) => {
       const credentials = <ICredentials> request.auth.credentials;
 
-      // FIXME soft delete
       await models.Session.destroy({
         where: {
           uuid: credentials.sessionId
