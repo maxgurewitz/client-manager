@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Redirect, BrowserRouter, Route, Switch, Link } from 'react-router-dom'
-import * as qs from 'qs';
 import * as _ from 'lodash';
 import * as Bluebird from 'bluebird';
 import axios, {AxiosRequestConfig, AxiosError} from 'axios';
@@ -89,7 +88,13 @@ interface State   {
     name: string
   },
   projectForm: {
-    name: string
+    name: string,
+    selected: number | null,
+    create: boolean,
+    projects: {
+      id: number,
+      name: string
+    }[]
   },
   loadingProject: boolean,
   isAuthenticated: boolean,
@@ -106,14 +111,16 @@ const emptyUserForm = {
 };
 
 const emptyProjectForm = {
-  name: ''
+  name: '',
+  selected: null,
+  create: false,
+  projects: []
 };
 
 export const App = class App extends React.Component<any, State> {
   constructor(props: any) {
     super(props);
 
-    const hashParams = qs.parse(location.hash.substring(1));
     const sessionId = localStorage.getItem('sessionId') || null;
 
     let loadingProject = false;
@@ -138,6 +145,7 @@ export const App = class App extends React.Component<any, State> {
     this.createProject = this.createProject.bind(this);
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
+    this.listProjects = this.login.bind(this.listProjects);
   }
 
   handleChange = (path, eventPath = 'value') => event => {
@@ -203,6 +211,13 @@ export const App = class App extends React.Component<any, State> {
     return this.request({
       method: 'post',
       url: '/api/logout'
+    });
+  }
+
+  async listProjects() {
+    const { projects } = await this.request({
+      method: 'get',
+      url: '/api/projects'
     });
   }
 

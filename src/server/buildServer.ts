@@ -258,7 +258,10 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       auth: false,
     },
     handler: async (request, h) => {
-      return { projects: [] };
+      const projects = await models.Project.findAll({
+        attributes: ['name', 'id']
+      });
+      return { projects };
     }
   });
 
