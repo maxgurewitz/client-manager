@@ -22,17 +22,28 @@ const Dashboard = ({state, logout}, {state: State, logout: any}) => (
   </div>
 );
 
-const CreateProject = ({createProject, handleChange, state}: {createProject: any, handleChange: any, state: State}) => {
-  return (
-    <div>
-      <TextField id="name" label="Project Name" onChange={handleChange('projectForm.name')} value={state.projectForm.name}/>
-      <Button variant="contained" color="primary" onClick={createProject}>
-        Create Project
-      </Button>
-    </div>
-  );
-}
 
+class CreateProject extends React.Component<{ listProjects: any, handleChange: any, state: State, createProject: any }, any> {
+  componentWillMount() {
+    this.props.listProjects();
+  }
+
+  render() {
+    return (
+      <div>
+        <TextField
+          id="name"
+          label="Project Name"
+          onChange={this.props.handleChange('projectForm.name')}
+          value={this.props.state.projectForm.name}/>
+        <Button variant="contained" color="primary" onClick={this.props.createProject}>
+          Create Project
+        </Button>
+      </div>
+    );
+  }
+
+}
 
 const AuthorizationPending = () => (
   <div>
@@ -145,7 +156,7 @@ export const App = class App extends React.Component<any, State> {
     this.createProject = this.createProject.bind(this);
     this.logout = this.logout.bind(this);
     this.login = this.login.bind(this);
-    this.listProjects = this.login.bind(this.listProjects);
+    this.listProjects = this.listProjects.bind(this);
   }
 
   handleChange = (path, eventPath = 'value') => event => {
@@ -219,9 +230,16 @@ export const App = class App extends React.Component<any, State> {
       method: 'get',
       url: '/api/projects'
     });
+
+    this.setState(state => {
+      projectForm: {
+        projects
+      }
+    });
   }
 
   async login() {
+    debugger;
     this.setState({ loadingProject: true });
 
     try {
@@ -298,9 +316,10 @@ export const App = class App extends React.Component<any, State> {
           if (this.state.loadingProject) {
             component = <Loading/>;
           } else if (this.state.isAuthenticated && !this.state.projectId) {
+            debugger;
             component = (
               <Switch>
-                <Route exact path="/register" render={() => <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state}/>}/>
+                <Route exact path="/register" render={() => <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state} listProjects={this.listProjects} />}/>
                 <Route render={() => <Redirect to="/register"/>}/>
               </Switch>
             );
@@ -314,12 +333,13 @@ export const App = class App extends React.Component<any, State> {
               </Switch>
             );
           } else {
+            debugger;
             // when user is authenticated, authorized, and with projectId
             component = (
               <Switch>
                 <Route exact path="/" render={() => <Redirect to="/dashboard"/>}/>
                 <Route exact path="/dashboard" render={() => <Dashboard state={this.state} logout={this.logout}/>}/>
-                <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state}/>}/>
+                <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state} listProjects={this.listProjects}/>}/>
                 <Route exact path="/authorization-pending" component={AuthorizationPending}/>
                 <Route component={NoMatch}/>
               </Switch>
