@@ -5279,6 +5279,305 @@ var _List = _interopRequireDefault(__webpack_require__(/*! ./List */ "./node_mod
 
 /***/ }),
 
+/***/ "./node_modules/@material-ui/core/ListItem/ListItem.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/@material-ui/core/ListItem/ListItem.js ***!
+  \*************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/builtin/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/builtin/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.styles = void 0;
+
+var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/extends */ "./node_modules/@babel/runtime/helpers/builtin/extends.js"));
+
+var _objectSpread2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/objectSpread */ "./node_modules/@babel/runtime/helpers/builtin/objectSpread.js"));
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/defineProperty */ "./node_modules/@babel/runtime/helpers/builtin/defineProperty.js"));
+
+var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/objectWithoutProperties */ "./node_modules/@babel/runtime/helpers/builtin/objectWithoutProperties.js"));
+
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/classCallCheck */ "./node_modules/@babel/runtime/helpers/builtin/classCallCheck.js"));
+
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/createClass */ "./node_modules/@babel/runtime/helpers/builtin/createClass.js"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/possibleConstructorReturn */ "./node_modules/@babel/runtime/helpers/builtin/possibleConstructorReturn.js"));
+
+var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/inherits */ "./node_modules/@babel/runtime/helpers/builtin/inherits.js"));
+
+var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
+
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js"));
+
+var _classnames = _interopRequireDefault(__webpack_require__(/*! classnames */ "./node_modules/classnames/index.js"));
+
+var _withStyles = _interopRequireDefault(__webpack_require__(/*! ../styles/withStyles */ "./node_modules/@material-ui/core/styles/withStyles.js"));
+
+var _ButtonBase = _interopRequireDefault(__webpack_require__(/*! ../ButtonBase */ "./node_modules/@material-ui/core/ButtonBase/index.js"));
+
+var _reactHelpers = __webpack_require__(/*! ../utils/reactHelpers */ "./node_modules/@material-ui/core/utils/reactHelpers.js");
+
+var styles = function styles(theme) {
+  return {
+    root: {
+      display: 'flex',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      position: 'relative',
+      textDecoration: 'none',
+      width: '100%',
+      boxSizing: 'border-box',
+      textAlign: 'left'
+    },
+    container: {
+      position: 'relative'
+    },
+    focusVisible: {
+      backgroundColor: theme.palette.action.hover
+    },
+    default: {
+      paddingTop: 12,
+      paddingBottom: 12
+    },
+    dense: {
+      paddingTop: 8,
+      paddingBottom: 8
+    },
+    disabled: {
+      opacity: 0.5
+    },
+    divider: {
+      borderBottom: "1px solid ".concat(theme.palette.divider),
+      backgroundClip: 'padding-box'
+    },
+    gutters: theme.mixins.gutters(),
+    button: {
+      transition: theme.transitions.create('background-color', {
+        duration: theme.transitions.duration.shortest
+      }),
+      '&:hover': {
+        textDecoration: 'none',
+        backgroundColor: theme.palette.action.hover,
+        // Reset on touch devices, it doesn't add specificity
+        '@media (hover: none)': {
+          backgroundColor: 'transparent'
+        }
+      }
+    },
+    secondaryAction: {
+      // Add some space to avoid collision as `ListItemSecondaryAction`
+      // is absolutely positionned.
+      paddingRight: 32
+    }
+  };
+};
+
+exports.styles = styles;
+
+var ListItem =
+/*#__PURE__*/
+function (_React$Component) {
+  (0, _inherits2.default)(ListItem, _React$Component);
+
+  function ListItem() {
+    (0, _classCallCheck2.default)(this, ListItem);
+    return (0, _possibleConstructorReturn2.default)(this, (ListItem.__proto__ || Object.getPrototypeOf(ListItem)).apply(this, arguments));
+  }
+
+  (0, _createClass2.default)(ListItem, [{
+    key: "getChildContext",
+    value: function getChildContext() {
+      return {
+        dense: this.props.dense || this.context.dense || false
+      };
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _classNames;
+
+      var _props = this.props,
+          button = _props.button,
+          childrenProp = _props.children,
+          classes = _props.classes,
+          classNameProp = _props.className,
+          componentProp = _props.component,
+          ContainerComponent = _props.ContainerComponent,
+          _props$ContainerProps = _props.ContainerProps;
+      _props$ContainerProps = _props$ContainerProps === void 0 ? {} : _props$ContainerProps;
+      var ContainerClassName = _props$ContainerProps.className,
+          ContainerProps = (0, _objectWithoutProperties2.default)(_props$ContainerProps, ["className"]),
+          dense = _props.dense,
+          disabled = _props.disabled,
+          disableGutters = _props.disableGutters,
+          divider = _props.divider,
+          focusVisibleClassName = _props.focusVisibleClassName,
+          other = (0, _objectWithoutProperties2.default)(_props, ["button", "children", "classes", "className", "component", "ContainerComponent", "ContainerProps", "dense", "disabled", "disableGutters", "divider", "focusVisibleClassName"]);
+      var isDense = dense || this.context.dense || false;
+
+      var children = _react.default.Children.toArray(childrenProp);
+
+      var hasAvatar = children.some(function (value) {
+        return (0, _reactHelpers.isMuiElement)(value, ['ListItemAvatar']);
+      });
+      var hasSecondaryAction = children.length && (0, _reactHelpers.isMuiElement)(children[children.length - 1], ['ListItemSecondaryAction']);
+      var className = (0, _classnames.default)(classes.root, isDense || hasAvatar ? classes.dense : classes.default, (_classNames = {}, (0, _defineProperty2.default)(_classNames, classes.gutters, !disableGutters), (0, _defineProperty2.default)(_classNames, classes.divider, divider), (0, _defineProperty2.default)(_classNames, classes.disabled, disabled), (0, _defineProperty2.default)(_classNames, classes.button, button), (0, _defineProperty2.default)(_classNames, classes.secondaryAction, hasSecondaryAction), _classNames), classNameProp);
+      var componentProps = (0, _objectSpread2.default)({
+        className: className,
+        disabled: disabled
+      }, other);
+      var Component = componentProp || 'li';
+
+      if (button) {
+        componentProps.component = componentProp || 'div';
+        componentProps.focusVisibleClassName = (0, _classnames.default)(classes.focusVisible, focusVisibleClassName);
+        Component = _ButtonBase.default;
+      }
+
+      if (hasSecondaryAction) {
+        // Use div by default.
+        Component = !componentProps.component && !componentProp ? 'div' : Component; // Avoid nesting of li > li.
+
+        if (ContainerComponent === 'li') {
+          if (Component === 'li') {
+            Component = 'div';
+          } else if (componentProps.component === 'li') {
+            componentProps.component = 'div';
+          }
+        }
+
+        return _react.default.createElement(ContainerComponent, (0, _extends2.default)({
+          className: (0, _classnames.default)(classes.container, ContainerClassName)
+        }, ContainerProps), _react.default.createElement(Component, componentProps, children), children.pop());
+      }
+
+      return _react.default.createElement(Component, componentProps, children);
+    }
+  }]);
+  return ListItem;
+}(_react.default.Component);
+
+ListItem.propTypes =  true ? {
+  /**
+   * If `true`, the list item will be a button (using `ButtonBase`).
+   */
+  button: _propTypes.default.bool,
+
+  /**
+   * The content of the component.
+   */
+  children: _propTypes.default.node,
+
+  /**
+   * Override or extend the styles applied to the component.
+   * See [CSS API](#css-api) below for more details.
+   */
+  classes: _propTypes.default.object.isRequired,
+
+  /**
+   * @ignore
+   */
+  className: _propTypes.default.string,
+
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   * By default, it's a `li` when `button` is `false` and a `div` when `button` is `true`.
+   */
+  component: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.func, _propTypes.default.object]),
+
+  /**
+   * The container component used when a `ListItemSecondaryAction` is rendered.
+   */
+  ContainerComponent: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.func, _propTypes.default.object]),
+
+  /**
+   * Properties applied to the container element when the component
+   * is used to display a `ListItemSecondaryAction`.
+   */
+  ContainerProps: _propTypes.default.object,
+
+  /**
+   * If `true`, compact vertical padding designed for keyboard and mouse input will be used.
+   */
+  dense: _propTypes.default.bool,
+
+  /**
+   * @ignore
+   */
+  disabled: _propTypes.default.bool,
+
+  /**
+   * If `true`, the left and right padding is removed.
+   */
+  disableGutters: _propTypes.default.bool,
+
+  /**
+   * If `true`, a 1px light border is added to the bottom of the list item.
+   */
+  divider: _propTypes.default.bool,
+
+  /**
+   * @ignore
+   */
+  focusVisibleClassName: _propTypes.default.string
+} : undefined;
+ListItem.defaultProps = {
+  button: false,
+  ContainerComponent: 'li',
+  dense: false,
+  disabled: false,
+  disableGutters: false,
+  divider: false
+};
+ListItem.contextTypes = {
+  dense: _propTypes.default.bool
+};
+ListItem.childContextTypes = {
+  dense: _propTypes.default.bool
+};
+
+var _default = (0, _withStyles.default)(styles, {
+  name: 'MuiListItem'
+})(ListItem);
+
+exports.default = _default;
+
+/***/ }),
+
+/***/ "./node_modules/@material-ui/core/ListItem/index.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/@material-ui/core/ListItem/index.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/builtin/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/builtin/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function get() {
+    return _ListItem.default;
+  }
+});
+
+var _ListItem = _interopRequireDefault(__webpack_require__(/*! ./ListItem */ "./node_modules/@material-ui/core/ListItem/ListItem.js"));
+
+/***/ }),
+
 /***/ "./node_modules/@material-ui/core/Menu/Menu.js":
 /*!*****************************************************!*\
   !*** ./node_modules/@material-ui/core/Menu/Menu.js ***!
@@ -5564,6 +5863,152 @@ var _default = (0, _withStyles.default)(styles, {
 })(Menu);
 
 exports.default = _default;
+
+/***/ }),
+
+/***/ "./node_modules/@material-ui/core/MenuItem/MenuItem.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/@material-ui/core/MenuItem/MenuItem.js ***!
+  \*************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/builtin/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/builtin/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.styles = void 0;
+
+var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/extends */ "./node_modules/@babel/runtime/helpers/builtin/extends.js"));
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/defineProperty */ "./node_modules/@babel/runtime/helpers/builtin/defineProperty.js"));
+
+var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/objectWithoutProperties */ "./node_modules/@babel/runtime/helpers/builtin/objectWithoutProperties.js"));
+
+var _objectSpread2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/builtin/objectSpread */ "./node_modules/@babel/runtime/helpers/builtin/objectSpread.js"));
+
+var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
+
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js"));
+
+var _classnames = _interopRequireDefault(__webpack_require__(/*! classnames */ "./node_modules/classnames/index.js"));
+
+var _withStyles = _interopRequireDefault(__webpack_require__(/*! ../styles/withStyles */ "./node_modules/@material-ui/core/styles/withStyles.js"));
+
+var _ListItem = _interopRequireDefault(__webpack_require__(/*! ../ListItem */ "./node_modules/@material-ui/core/ListItem/index.js"));
+
+// @inheritedComponent ListItem
+var styles = function styles(theme) {
+  return {
+    root: (0, _objectSpread2.default)({}, theme.typography.subheading, {
+      height: 24,
+      boxSizing: 'content-box',
+      width: 'auto',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      paddingLeft: 16,
+      paddingRight: 16,
+      '&$selected': {
+        backgroundColor: theme.palette.action.selected
+      }
+    }),
+    selected: {}
+  };
+};
+
+exports.styles = styles;
+
+function MenuItem(props) {
+  var classes = props.classes,
+      className = props.className,
+      component = props.component,
+      selected = props.selected,
+      role = props.role,
+      other = (0, _objectWithoutProperties2.default)(props, ["classes", "className", "component", "selected", "role"]);
+  return _react.default.createElement(_ListItem.default, (0, _extends2.default)({
+    button: true,
+    role: role,
+    tabIndex: -1,
+    className: (0, _classnames.default)(classes.root, (0, _defineProperty2.default)({}, classes.selected, selected), className),
+    component: component
+  }, other));
+}
+
+MenuItem.propTypes =  true ? {
+  /**
+   * Menu item contents.
+   */
+  children: _propTypes.default.node,
+
+  /**
+   * Override or extend the styles applied to the component.
+   * See [CSS API](#css-api) below for more details.
+   */
+  classes: _propTypes.default.object.isRequired,
+
+  /**
+   * @ignore
+   */
+  className: _propTypes.default.string,
+
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.func, _propTypes.default.object]),
+
+  /**
+   * @ignore
+   */
+  role: _propTypes.default.string,
+
+  /**
+   * Use to apply selected styling.
+   */
+  selected: _propTypes.default.bool
+} : undefined;
+MenuItem.defaultProps = {
+  component: 'li',
+  role: 'menuitem',
+  selected: false
+};
+
+var _default = (0, _withStyles.default)(styles, {
+  name: 'MuiMenuItem'
+})(MenuItem);
+
+exports.default = _default;
+
+/***/ }),
+
+/***/ "./node_modules/@material-ui/core/MenuItem/index.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/@material-ui/core/MenuItem/index.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/builtin/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/builtin/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function get() {
+    return _MenuItem.default;
+  }
+});
+
+var _MenuItem = _interopRequireDefault(__webpack_require__(/*! ./MenuItem */ "./node_modules/@material-ui/core/MenuItem/MenuItem.js"));
 
 /***/ }),
 
@@ -45301,7 +45746,12 @@ var TextField_1 = __webpack_require__(/*! @material-ui/core/TextField */ "./node
 var Button_1 = __webpack_require__(/*! @material-ui/core/Button */ "./node_modules/@material-ui/core/Button/index.js");
 var Switch_1 = __webpack_require__(/*! @material-ui/core/Switch */ "./node_modules/@material-ui/core/Switch/index.js");
 var FormGroup_1 = __webpack_require__(/*! @material-ui/core/FormGroup */ "./node_modules/@material-ui/core/FormGroup/index.js");
+var FormControl_1 = __webpack_require__(/*! @material-ui/core/FormControl */ "./node_modules/@material-ui/core/FormControl/index.js");
+var Select_1 = __webpack_require__(/*! @material-ui/core/Select */ "./node_modules/@material-ui/core/Select/index.js");
+var InputLabel_1 = __webpack_require__(/*! @material-ui/core/InputLabel */ "./node_modules/@material-ui/core/InputLabel/index.js");
+var MenuItem_1 = __webpack_require__(/*! @material-ui/core/MenuItem */ "./node_modules/@material-ui/core/MenuItem/index.js");
 var FormControlLabel_1 = __webpack_require__(/*! @material-ui/core/FormControlLabel */ "./node_modules/@material-ui/core/FormControlLabel/index.js");
+var AwaitingPermission = function () { return (React.createElement("div", null, " Waiting for permission from project administrator. ")); };
 var NoMatch = function () { return (React.createElement("div", null, " 404 ")); };
 var Dashboard = function (_a, _b) {
     var state = _a.state, logout = _a.logout;
@@ -45319,9 +45769,34 @@ var CreateProject = /** @class */ (function (_super) {
         this.props.listProjects();
     };
     CreateProject.prototype.render = function () {
+        return this.props.state.projectForm.create ?
+            this.renderNewProject() :
+            this.renderSelectProject();
+    };
+    CreateProject.prototype.renderNewProject = function () {
         return (React.createElement("div", null,
             React.createElement(TextField_1["default"], { id: "name", label: "Project Name", onChange: this.props.handleChange('projectForm.name'), value: this.props.state.projectForm.name }),
-            React.createElement(Button_1["default"], { variant: "contained", color: "primary", onClick: this.props.createProject }, "Create Project")));
+            React.createElement(Button_1["default"], { variant: "contained", color: "primary", onClick: this.props.createProject }, "Create Project"),
+            this.renderSwitch()));
+    };
+    CreateProject.prototype.renderSwitch = function () {
+        return (React.createElement(FormGroup_1["default"], null,
+            React.createElement(FormControlLabel_1["default"], { control: React.createElement(Switch_1["default"], { checked: this.props.state.projectForm.create, onChange: this.props.handleChange('projectForm.create', 'checked'), value: "createProject" }), label: !this.props.state.projectForm.create ? 'Create Project' : 'Select Project' })));
+    };
+    CreateProject.prototype.renderSelectProject = function () {
+        var selectLabel = 'Select Project';
+        return (React.createElement("div", null,
+            React.createElement(FormControl_1["default"], { style: { minWidth: selectLabel.length + 5 + "ch" } },
+                React.createElement(InputLabel_1["default"], { htmlFor: "project-select" }, selectLabel),
+                React.createElement(Select_1["default"], { value: this.props.state.projectForm.selected || '', onChange: this.props.handleChange('projectForm.selected'), inputProps: {
+                        name: 'project',
+                        id: 'project-select'
+                    } }, this.props.state.projectForm.projects.map(function (project) { return (React.createElement(MenuItem_1["default"], { key: project.id, value: project.id },
+                    " ",
+                    project.name,
+                    " ")); }))),
+            React.createElement(Button_1["default"], { variant: "contained", color: "primary", onClick: this.props.requestProjectPermissions }, "Request"),
+            this.renderSwitch()));
     };
     return CreateProject;
 }(React.Component));
@@ -45368,31 +45843,32 @@ exports.App = /** @class */ (function (_super) {
             };
         };
         var sessionId = localStorage.getItem('sessionId') || null;
-        var loadingProject = false;
+        var loading = false;
         if (sessionId) {
-            loadingProject = true;
+            loading = true;
             _this.loadProject(sessionId);
         }
         var state = {
+            user: null,
             userForm: _.clone(emptyUserForm),
             projectForm: _.clone(emptyProjectForm),
-            loadingProject: loadingProject,
+            loading: loading,
             isAuthenticated: false,
             isAuthorized: false,
             projectId: null,
+            awaitingPermission: false,
             sessionId: sessionId
         };
         _this.state = state;
-        _this.createUser = _this.createUser.bind(_this);
-        _this.createProject = _this.createProject.bind(_this);
-        _this.logout = _this.logout.bind(_this);
-        _this.login = _this.login.bind(_this);
-        _this.listProjects = _this.listProjects.bind(_this);
+        var boundMethods = ['createUser', 'createProject', 'logout', 'login', 'listProjects', 'requestProjectPermissions'];
+        boundMethods.forEach(function (method) {
+            _this[method] = _this[method].bind(_this);
+        });
         return _this;
     }
     App.prototype.request = function (config, sessionId) {
         return __awaiter(this, void 0, void 0, function () {
-            var data, e_1, error, status_1;
+            var data, e_1, error, status_1, awaitingPermission;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -45412,7 +45888,9 @@ exports.App = /** @class */ (function (_super) {
                             this.reset();
                         }
                         else if (status_1 === 403) {
+                            awaitingPermission = _.get(e_1, 'response.data.awaitingPermission', false);
                             this.setState({
+                                awaitingPermission: awaitingPermission,
                                 isAuthorized: false,
                                 isAuthenticated: true
                             });
@@ -45426,6 +45904,7 @@ exports.App = /** @class */ (function (_super) {
     App.prototype.reset = function () {
         localStorage.removeItem('sessionId');
         this.setState({
+            user: null,
             projectId: null,
             sessionId: null,
             isAuthorized: false,
@@ -45434,9 +45913,9 @@ exports.App = /** @class */ (function (_super) {
     };
     App.prototype.createUser = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, name, email, password, sessionId;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _a, name, email, password, _b, user, sessionId;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         _a = this.state.userForm, name = _a.name, email = _a.email, password = _a.password;
                         return [4 /*yield*/, this.request({
@@ -45445,9 +45924,10 @@ exports.App = /** @class */ (function (_super) {
                                 data: { name: name, email: email, password: password }
                             })];
                     case 1:
-                        sessionId = (_b.sent()).sessionId;
+                        _b = _c.sent(), user = _b.user, sessionId = _b.sessionId;
                         localStorage.setItem('sessionId', sessionId);
                         this.setState({
+                            user: user,
                             sessionId: sessionId,
                             userForm: _.clone(emptyUserForm),
                             isAuthenticated: true
@@ -45479,11 +45959,7 @@ exports.App = /** @class */ (function (_super) {
                         })];
                     case 1:
                         projects = (_a.sent()).projects;
-                        this.setState(function (state) {
-                            projectForm: {
-                                projects;
-                            }
-                        });
+                        this.setState(function (state) { return _.set(state, 'projectForm.projects', projects); });
                         return [2 /*return*/];
                 }
             });
@@ -45491,15 +45967,14 @@ exports.App = /** @class */ (function (_super) {
     };
     App.prototype.login = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var sessionId, e_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, sessionId, user, e_2;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        debugger;
-                        this.setState({ loadingProject: true });
-                        _a.label = 1;
+                        this.setState({ loading: true });
+                        _b.label = 1;
                     case 1:
-                        _a.trys.push([1, 4, , 5]);
+                        _b.trys.push([1, 4, , 5]);
                         return [4 /*yield*/, this.request({
                                 method: 'post',
                                 url: '/api/login',
@@ -45509,7 +45984,7 @@ exports.App = /** @class */ (function (_super) {
                                 }
                             })];
                     case 2:
-                        sessionId = (_a.sent()).sessionId;
+                        _a = _b.sent(), sessionId = _a.sessionId, user = _a.user;
                         localStorage.setItem('sessionId', sessionId);
                         this.setState({
                             sessionId: sessionId,
@@ -45518,12 +45993,12 @@ exports.App = /** @class */ (function (_super) {
                         });
                         return [4 /*yield*/, this.loadProject(sessionId)];
                     case 3:
-                        _a.sent();
+                        _b.sent();
                         return [3 /*break*/, 5];
                     case 4:
-                        e_2 = _a.sent();
+                        e_2 = _b.sent();
                         this.setState({
-                            loadingProject: false
+                            loading: false
                         });
                         return [3 /*break*/, 5];
                     case 5: return [2 /*return*/, null];
@@ -45531,29 +46006,73 @@ exports.App = /** @class */ (function (_super) {
             });
         });
     };
-    App.prototype.loadProject = function (sessionId) {
+    App.prototype.requestProjectPermissions = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var project, e_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
+                        if (!(this.state.projectForm.selected && this.state.user)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.assignPermissions(this.state.projectForm.selected, 2, this.state.user.id)];
+                    case 1:
+                        _a.sent();
+                        this.setState({ awaitingPermission: true });
+                        _a.label = 2;
+                    case 2: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    App.prototype.assignPermissions = function (projectId, level, targetId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                this.setState({
+                    loading: true
+                });
+                try {
+                    this.request({
+                        method: 'post',
+                        url: '/api/permissions',
+                        data: {
+                            projectId: projectId,
+                            targetId: targetId,
+                            level: level
+                        }
+                    });
+                }
+                finally {
+                    this.setState({
+                        loading: false
+                    });
+                }
+                return [2 /*return*/, null];
+            });
+        });
+    };
+    App.prototype.loadProject = function (sessionId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, user, project, e_3;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
                         return [4 /*yield*/, this.request({
                                 url: '/api/projects/latest'
                             }, sessionId)];
                     case 1:
-                        project = (_a.sent()).project;
+                        _a = _b.sent(), user = _a.user, project = _a.project;
                         this.setState({
+                            user: user,
                             projectId: project.id,
-                            loadingProject: false,
+                            loading: false,
                             isAuthorized: true,
                             isAuthenticated: true
                         });
                         return [3 /*break*/, 3];
                     case 2:
-                        e_3 = _a.sent();
+                        e_3 = _b.sent();
                         this.setState({
-                            loadingProject: false
+                            user: _.get(e_3, 'response.data.user'),
+                            loading: false
                         });
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/, null];
@@ -45591,13 +46110,15 @@ exports.App = /** @class */ (function (_super) {
         return (React.createElement(react_router_dom_1.BrowserRouter, null,
             React.createElement(react_router_dom_1.Route, { path: "/", render: function (routerProps) {
                     var component;
-                    if (_this.state.loadingProject) {
+                    if (_this.state.loading) {
                         component = React.createElement(Loading, null);
                     }
+                    else if (_this.state.isAuthenticated && _this.state.awaitingPermission) {
+                        component = React.createElement(AwaitingPermission, null);
+                    }
                     else if (_this.state.isAuthenticated && !_this.state.projectId) {
-                        debugger;
                         component = (React.createElement(react_router_dom_1.Switch, null,
-                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return React.createElement(CreateProject, { handleChange: _this.handleChange, createProject: _this.createProject, state: _this.state, listProjects: _this.listProjects }); } }),
+                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return React.createElement(CreateProject, { handleChange: _this.handleChange, createProject: _this.createProject, state: _this.state, listProjects: _this.listProjects, requestProjectPermissions: _this.requestProjectPermissions }); } }),
                             React.createElement(react_router_dom_1.Route, { render: function () { return React.createElement(react_router_dom_1.Redirect, { to: "/register" }); } })));
                     }
                     else if (_this.state.isAuthenticated && !_this.state.isAuthorized && _this.state.projectId) {
@@ -45609,12 +46130,11 @@ exports.App = /** @class */ (function (_super) {
                             React.createElement(react_router_dom_1.Route, { render: function () { return React.createElement(react_router_dom_1.Redirect, { to: "/" }); } })));
                     }
                     else {
-                        debugger;
                         // when user is authenticated, authorized, and with projectId
                         component = (React.createElement(react_router_dom_1.Switch, null,
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/", render: function () { return React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }); } }),
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/dashboard", render: function () { return React.createElement(Dashboard, { state: _this.state, logout: _this.logout }); } }),
-                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return _this.state.projectId ? React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }) : React.createElement(CreateProject, { handleChange: _this.handleChange, createProject: _this.createProject, state: _this.state, listProjects: _this.listProjects }); } }),
+                            React.createElement(react_router_dom_1.Route, { exact: true, path: "/register", render: function () { return _this.state.projectId ? React.createElement(react_router_dom_1.Redirect, { to: "/dashboard" }) : React.createElement(CreateProject, { handleChange: _this.handleChange, createProject: _this.createProject, state: _this.state, listProjects: _this.listProjects, requestProjectPermissions: _this.requestProjectPermissions }); } }),
                             React.createElement(react_router_dom_1.Route, { exact: true, path: "/authorization-pending", component: AuthorizationPending }),
                             React.createElement(react_router_dom_1.Route, { component: NoMatch })));
                     }

@@ -14,6 +14,7 @@ const SQL = Sequelize.Op;
 
 // 3 days in ms
 const SESSION_EXPIRATION = 1000 * 60 * 60 * 24 * 3;
+const EXPOSED_USER_FIELDS = ['email', 'name', 'id'];
 
 interface ISession {
   expiration: number,
@@ -205,26 +206,32 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
     handler: async (request, h) => {
       const { userId } = <IAuthArtifact> request.auth.artifacts;
 
-      const lastPermission = await models.Permission.findOne({
-          where: {
-            userId,
-            [SQL.or]: [
-              { level: { [SQL.eq]: '0' } },
-              { level: { [SQL.eq]: '1' } }
-            ]
-          },
-          order: [['createdAt', 'DESC']]
-      });
+      const [lastPermission, user] = await Promise.all([
+          models.Permission.findOne({
+            where: {
+              userId,
+            },
+            order: [['createdAt', 'DESC']]
+          }),
+          models.User.findById(userId)
+      ]);
 
-      if (!lastPermission) {
-        throw Boom.forbidden('Lacking permissions for any project.');
+      const level = Number(_.get(lastPermission, 'level', 3));
+
+      if (level > 1) {
+        return h.response({
+          user: _.pick(user, EXPOSED_USER_FIELDS),
+          statusCode: 403,
+          message: 'Lacking permissions for any project.',
+          awaitingPermission: level === 2
+        }).code(403);
       }
 
       const { projectId } = lastPermission;
 
       const project = await models.Project.findById(projectId);
 
-      return { project: { id: projectId, name: project.name } };
+      return { project: { id: projectId, name: project.name }, user: _.pick(user, EXPOSED_USER_FIELDS) };
     }
   });
 
@@ -357,7 +364,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
         uuid: sessionId
       });
 
-      return { sessionId };
+      return { sessionId, user: _.pick(user, EXPOSED_USER_FIELDS) };
     }
   });
 
@@ -386,7 +393,7 @@ export default async function buildServer({ port, databaseUrl } : { port?: numbe
       });
 
       return {
-        user: { id: user.id },
+        user: _.pick(user, EXPOSED_USER_FIELDS),
         sessionId
       };
     }

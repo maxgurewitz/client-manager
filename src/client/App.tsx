@@ -7,7 +7,15 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import SwitchButton from '@material-ui/core/Switch';
 import FormGroup from '@material-ui/core/FormGroup';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+
+const AwaitingPermission = () => (
+  <div> Waiting for permission from project administrator. </div>
+);
 
 const NoMatch = () => (
   <div> 404 </div>
@@ -23,12 +31,18 @@ const Dashboard = ({state, logout}, {state: State, logout: any}) => (
 );
 
 
-class CreateProject extends React.Component<{ listProjects: any, handleChange: any, state: State, createProject: any }, any> {
+class CreateProject extends React.Component<{ listProjects: any, handleChange: any, state: State, createProject: any, requestProjectPermissions: any }, any> {
   componentWillMount() {
     this.props.listProjects();
   }
 
   render() {
+    return this.props.state.projectForm.create ?
+      this.renderNewProject() :
+      this.renderSelectProject();
+  }
+
+  renderNewProject() {
     return (
       <div>
         <TextField
@@ -36,9 +50,57 @@ class CreateProject extends React.Component<{ listProjects: any, handleChange: a
           label="Project Name"
           onChange={this.props.handleChange('projectForm.name')}
           value={this.props.state.projectForm.name}/>
+
         <Button variant="contained" color="primary" onClick={this.props.createProject}>
           Create Project
         </Button>
+
+        { this.renderSwitch() }
+      </div>
+    );
+  }
+
+  renderSwitch() {
+    return (
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <SwitchButton
+              checked={ this.props.state.projectForm.create }
+              onChange={ this.props.handleChange('projectForm.create', 'checked') }
+              value="createProject"
+            />
+          }
+          label={ !this.props.state.projectForm.create ? 'Create Project' : 'Select Project' }
+        />
+      </FormGroup>
+    );
+  }
+
+  renderSelectProject() {
+    const selectLabel = 'Select Project';
+    return (
+      <div>
+        <FormControl style={ { minWidth: `${selectLabel.length + 5}ch` } }>
+          <InputLabel htmlFor="project-select">{ selectLabel }</InputLabel>
+          <Select
+            value={this.props.state.projectForm.selected || ''}
+            onChange={this.props.handleChange('projectForm.selected')}
+            inputProps={{
+              name: 'project',
+              id: 'project-select',
+            }}
+          >
+            {
+              this.props.state.projectForm.projects.map(project => (<MenuItem key={project.id} value={project.id}> {project.name} </MenuItem>))
+            }
+          </Select>
+        </FormControl>
+
+        <Button variant="contained" color="primary" onClick={this.props.requestProjectPermissions}>
+          Request
+        </Button>
+        { this.renderSwitch() }
       </div>
     );
   }
@@ -91,7 +153,12 @@ const PublicHomePage = ({login, createUser, handleChange, state}: {login: any, c
   );
 };
 
-interface State   {
+interface State {
+  user: null | {
+    name: string,
+    id: number,
+    email: string
+  },
   userForm: {
     email: string,
     password: string,
@@ -107,7 +174,8 @@ interface State   {
       name: string
     }[]
   },
-  loadingProject: boolean,
+  awaitingPermission: boolean,
+  loading: boolean,
   isAuthenticated: boolean,
   isAuthorized: boolean,
   projectId: string | null,
@@ -134,29 +202,32 @@ export const App = class App extends React.Component<any, State> {
 
     const sessionId = localStorage.getItem('sessionId') || null;
 
-    let loadingProject = false;
+    let loading = false;
 
     if (sessionId) {
-      loadingProject = true;
+      loading = true;
       this.loadProject(sessionId);
     }
 
     const state = {
+      user: null,
       userForm: _.clone(emptyUserForm),
       projectForm: _.clone(emptyProjectForm),
-      loadingProject,
+      loading,
       isAuthenticated: false,
       isAuthorized: false,
       projectId: null,
+      awaitingPermission: false,
       sessionId
     };
 
     this.state = state;
-    this.createUser = this.createUser.bind(this);
-    this.createProject = this.createProject.bind(this);
-    this.logout = this.logout.bind(this);
-    this.login = this.login.bind(this);
-    this.listProjects = this.listProjects.bind(this);
+
+    const boundMethods = ['createUser', 'createProject', 'logout', 'login', 'listProjects', 'requestProjectPermissions'];
+
+    boundMethods.forEach(method => {
+      this[method] = this[method].bind(this);
+    });
   }
 
   handleChange = (path, eventPath = 'value') => event => {
@@ -179,7 +250,10 @@ export const App = class App extends React.Component<any, State> {
       if (status === 401) {
         this.reset();
       } else if (status === 403) {
+        const awaitingPermission = _.get(e, 'response.data.awaitingPermission', false);
+
         this.setState({
+          awaitingPermission,
           isAuthorized: false,
           isAuthenticated: true
         });
@@ -192,6 +266,7 @@ export const App = class App extends React.Component<any, State> {
   reset() {
     localStorage.removeItem('sessionId');
     this.setState({
+      user: null,
       projectId: null,
       sessionId: null,
       isAuthorized: false,
@@ -202,7 +277,7 @@ export const App = class App extends React.Component<any, State> {
   async createUser() {
     const { name, email, password } = this.state.userForm;
 
-    const { sessionId } = await this.request({
+    const { user, sessionId } = await this.request({
       method: 'post',
       url: '/api/users',
       data: { name, email, password }
@@ -211,6 +286,7 @@ export const App = class App extends React.Component<any, State> {
     localStorage.setItem('sessionId', sessionId);
 
     this.setState({
+      user,
       sessionId,
       userForm: _.clone(emptyUserForm),
       isAuthenticated: true
@@ -231,19 +307,14 @@ export const App = class App extends React.Component<any, State> {
       url: '/api/projects'
     });
 
-    this.setState(state => {
-      projectForm: {
-        projects
-      }
-    });
+    this.setState(state => _.set(state, 'projectForm.projects', projects));
   }
 
   async login() {
-    debugger;
-    this.setState({ loadingProject: true });
+    this.setState({ loading: true });
 
     try {
-      const { sessionId } = await this.request({
+      const { sessionId, user } = await this.request({
         method: 'post',
         url: '/api/login',
         data: {
@@ -263,7 +334,37 @@ export const App = class App extends React.Component<any, State> {
       await this.loadProject(sessionId);
     } catch (e) {
       this.setState({
-        loadingProject: false
+        loading: false
+      });
+    }
+    return null;
+  }
+
+  async requestProjectPermissions() {
+    if (this.state.projectForm.selected && this.state.user) {
+      await this.assignPermissions(this.state.projectForm.selected, 2, this.state.user.id);
+      this.setState({ awaitingPermission: true });
+    }
+  }
+
+  async assignPermissions(projectId: number, level: number, targetId: number) {
+    this.setState({
+      loading: true
+    });
+
+    try {
+      this.request({
+        method: 'post',
+        url: '/api/permissions',
+        data: {
+          projectId,
+          targetId,
+          level
+        }
+      });
+    } finally {
+      this.setState({
+        loading: false
       });
     }
     return null;
@@ -271,19 +372,21 @@ export const App = class App extends React.Component<any, State> {
 
   async loadProject(sessionId: string) {
     try {
-      const { project } = await this.request({
+      const { user, project } = await this.request({
         url: '/api/projects/latest'
       }, sessionId);
 
       this.setState({
+        user,
         projectId: project.id,
-        loadingProject: false,
+        loading: false,
         isAuthorized: true,
         isAuthenticated: true
       });
     } catch (e) {
       this.setState({
-        loadingProject: false
+        user: _.get(e, 'response.data.user'),
+        loading: false
       });
     }
     return null;
@@ -313,13 +416,14 @@ export const App = class App extends React.Component<any, State> {
         <Route path="/" render={(routerProps) => {
           let component;
 
-          if (this.state.loadingProject) {
+          if (this.state.loading) {
             component = <Loading/>;
+          } else if (this.state.isAuthenticated && this.state.awaitingPermission) {
+            component = <AwaitingPermission/>;
           } else if (this.state.isAuthenticated && !this.state.projectId) {
-            debugger;
             component = (
               <Switch>
-                <Route exact path="/register" render={() => <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state} listProjects={this.listProjects} />}/>
+                <Route exact path="/register" render={() => <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state} listProjects={this.listProjects} requestProjectPermissions={this.requestProjectPermissions}/>}/>
                 <Route render={() => <Redirect to="/register"/>}/>
               </Switch>
             );
@@ -333,13 +437,12 @@ export const App = class App extends React.Component<any, State> {
               </Switch>
             );
           } else {
-            debugger;
             // when user is authenticated, authorized, and with projectId
             component = (
               <Switch>
                 <Route exact path="/" render={() => <Redirect to="/dashboard"/>}/>
                 <Route exact path="/dashboard" render={() => <Dashboard state={this.state} logout={this.logout}/>}/>
-                <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state} listProjects={this.listProjects}/>}/>
+                <Route exact path="/register" render={() => this.state.projectId ? <Redirect to="/dashboard"/> : <CreateProject handleChange={this.handleChange} createProject={this.createProject} state={this.state} listProjects={this.listProjects} requestProjectPermissions={this.requestProjectPermissions}/>}/>
                 <Route exact path="/authorization-pending" component={AuthorizationPending}/>
                 <Route component={NoMatch}/>
               </Switch>
